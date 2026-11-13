@@ -71,19 +71,23 @@ obligan a usar solo esa clave y nunca piden contraseña, para que la prueba no p
 entrar con acceso completo por otra vía.
 
 ```bash
-SSH_DEPLOY="ssh -i ~/.ssh/cv-deploy -o IdentitiesOnly=yes -o BatchMode=yes"
-
-# 1. Tiene que FALLAR: la clave no debe poder ejecutar comandos
-$SSH_DEPLOY USUARIO@IP_PI true && echo "MAL: la clave no está restringida" || echo "Bien: restringida"
+# 1. Tiene que responder con un error de rrsync, NUNCA con el texto SIN_RESTRICCION
+ssh -i ~/.ssh/cv-deploy -o IdentitiesOnly=yes -o BatchMode=yes USUARIO@IP_PI 'echo SIN_RESTRICCION'
 
 # 2. Simulación: muestra qué copiaría, sin tocar nada
-rsync -rltvzn --delete -e "$SSH_DEPLOY" dist/ USUARIO@IP_PI:
+rsync -rltvzn --delete -e "ssh -i ~/.ssh/cv-deploy -o IdentitiesOnly=yes -o BatchMode=yes" dist/ USUARIO@IP_PI:
 
 # 3. Copia real
-rsync -rltvz --delete -e "$SSH_DEPLOY" dist/ USUARIO@IP_PI:
+rsync -rltvz --delete -e "ssh -i ~/.ssh/cv-deploy -o IdentitiesOnly=yes -o BatchMode=yes" dist/ USUARIO@IP_PI:
 ```
 
-No sigas al paso 2 si el paso 1 dice "MAL". El workflow hace la misma comprobación
+Los comandos van escritos enteros a propósito: en zsh, la Terminal por defecto del Mac,
+una variable con espacios no se separa en argumentos.
+
+En la prueba 1 importa el texto de la respuesta, no si el comando "falla": `rrsync`
+no siempre devuelve un código de error al rechazar una orden. Lo correcto es ver
+`rrsync error: SSH_ORIGINAL_COMMAND does not run rsync`. Si ves `SIN_RESTRICCION`,
+no sigas. El workflow hace la misma comprobación
 antes de cada despliegue y se cancela si la clave no está restringida.
 
 ### 3. Tailscale

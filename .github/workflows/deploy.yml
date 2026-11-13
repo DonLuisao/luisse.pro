@@ -95,12 +95,18 @@ jobs:
         env:
           PI_USER: ${{ secrets.PI_USER }}
           PI_HOST: ${{ secrets.PI_HOST }}
-        # Con rrsync, la clave solo acepta rsync y cualquier otro comando falla.
-        # Si "true" funcionara, la clave tendría acceso completo y el --delete del
-        # siguiente paso actuaría sobre la carpeta personal: se cancela el despliegue.
+        # Se pide a la Pi que escriba un texto de control. Con rrsync, la orden se
+        # rechaza y el texto no aparece. Si apareciera, la clave tendría acceso completo
+        # y el --delete del siguiente paso actuaría sobre la carpeta personal.
+        # Se mira la respuesta y no el código de salida, que rrsync no siempre marca como error.
         run: |
-          if ssh -o BatchMode=yes "$PI_USER@$PI_HOST" true 2>/dev/null; then
+          respuesta=$(ssh -o BatchMode=yes "$PI_USER@$PI_HOST" 'echo SIN_RESTRICCION' 2>&1 || true)
+          if printf '%s' "$respuesta" | grep -q 'SIN_RESTRICCION'; then
             echo "::error::La clave de despliegue no está restringida con rrsync. Despliegue cancelado."
+            exit 1
+          fi
+          if ! printf '%s' "$respuesta" | grep -q 'rrsync'; then
+            echo "::error::Respuesta inesperada de la Pi: $respuesta"
             exit 1
           fi
           echo "Clave restringida correctamente."
