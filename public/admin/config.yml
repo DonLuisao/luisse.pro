@@ -1,0 +1,206 @@
+# Panel de edición del CV (Sveltia CMS): https://luisse.pro/admin/
+#
+# Edita src/data/cv.es.json y src/data/cv.en.json. Cada campo lleva "i18n":
+#   true       se traduce: tiene un valor en cada idioma
+#   duplicate  es igual en los dos idiomas: se escribe en español y se copia al inglés
+# En las listas con "duplicate", añadir, borrar o reordenar elementos se hace a la vez
+# en los dos idiomas; los textos de dentro siguen siendo traducibles.
+#
+# Todos los campos de los JSON tienen que estar aquí, o el panel los perdería al guardar.
+# scripts/check-cms.mjs lo comprueba en cada build.
+
+backend:
+  name: github
+  repo: DonLuisao/luisse.pro
+  branch: main
+  commit_messages:
+    update: "Contenido: actualizar el CV desde el panel"
+
+media_folder: public/uploads
+public_folder: /uploads
+site_url: https://luisse.pro
+display_url: https://luisse.pro
+
+i18n:
+  structure: multiple_files
+  locales: [es, en]
+  default_locale: es
+
+collections:
+  - name: cv
+    label: CV
+    i18n: true
+    files:
+      - name: cv
+        label: Contenido del CV
+        file: "src/data/cv.{{locale}}.json"
+        format: json
+        i18n: true
+        fields:
+          - label: Datos personales
+            name: basics
+            widget: object
+            i18n: true
+            fields:
+              - { label: Nombre, name: name, widget: string, i18n: duplicate }
+              - { label: Titular de la portada, name: headline, widget: string, i18n: true }
+              - { label: Puesto, name: role, widget: string, i18n: true }
+              - { label: Resumen de la portada y del PDF, name: summary, widget: text, i18n: true }
+              - { label: Ubicación, name: location, widget: string, i18n: true }
+              - { label: Disponibilidad, name: availability, widget: string, i18n: true }
+              - { label: Correo, name: email, widget: string, i18n: duplicate }
+              - { label: Teléfono, name: phone, widget: string, i18n: duplicate, required: false, hint: "Vacío para no publicarlo" }
+              - label: Enlaces
+                name: links
+                widget: list
+                i18n: duplicate
+                summary: "{{fields.label}}"
+                fields:
+                  - { label: Texto, name: label, widget: string, i18n: duplicate }
+                  - { label: URL, name: url, widget: string, i18n: duplicate }
+
+          - label: Sobre mí
+            name: about
+            widget: list
+            i18n: duplicate
+            hint: Un elemento por párrafo
+            field: { label: Párrafo, name: paragraph, widget: text, i18n: true }
+
+          - label: Experiencia
+            name: experience
+            widget: list
+            i18n: duplicate
+            hint: De más reciente a más antigua
+            summary: "{{fields.company}} ({{fields.period}})"
+            fields:
+              - { label: Empresa, name: company, widget: string, i18n: duplicate }
+              - { label: Puesto, name: role, widget: string, i18n: true }
+              - { label: Fechas, name: period, widget: string, i18n: true, required: false, hint: "Por ejemplo: jul 2023 – sep 2023" }
+              - { label: Puesto actual, name: current, widget: boolean, i18n: duplicate, default: false }
+              - label: Tareas y logros
+                name: bullets
+                widget: list
+                i18n: duplicate
+                required: false
+                field: { label: Tarea, name: bullet, widget: text, i18n: true }
+
+          - label: Formación
+            name: education
+            widget: list
+            i18n: duplicate
+            summary: "{{fields.title}}"
+            fields:
+              - { label: Título, name: title, widget: string, i18n: true }
+              - { label: Centro y detalles, name: detail, widget: string, i18n: true, required: false }
+              - { label: Fechas, name: period, widget: string, i18n: true, required: false }
+
+          - label: Idiomas
+            name: languages
+            widget: list
+            i18n: duplicate
+            summary: "{{fields.name}}: {{fields.level}}"
+            fields:
+              - { label: Idioma, name: name, widget: string, i18n: true }
+              - { label: Nivel, name: level, widget: string, i18n: true }
+
+          - label: Stack
+            name: skills
+            widget: list
+            i18n: duplicate
+            summary: "{{fields.group}}"
+            fields:
+              - { label: Grupo, name: group, widget: string, i18n: true }
+              - label: Tecnologías
+                name: items
+                widget: list
+                i18n: duplicate
+                summary: "{{fields.name}}: {{fields.level}}"
+                fields:
+                  - { label: Nombre, name: name, widget: string, i18n: true }
+                  - { label: Nivel, name: level, widget: string, i18n: true }
+
+          - label: Proyectos
+            name: projects
+            widget: list
+            i18n: duplicate
+            summary: "{{fields.name}}"
+            fields:
+              - { label: Nombre, name: name, widget: string, i18n: true }
+              - { label: Destacado, name: featured, widget: boolean, i18n: duplicate, default: false }
+              - { label: URL, name: url, widget: string, i18n: duplicate, required: false }
+              - { label: Descripción, name: description, widget: text, i18n: true }
+              - { label: Mi papel, name: role, widget: string, i18n: true }
+              - label: Tecnologías
+                name: stack
+                widget: list
+                i18n: duplicate
+                field: { label: Tecnología, name: tech, widget: string, i18n: duplicate }
+
+          - label: Panel de la ruta (portada)
+            name: route
+            widget: object
+            i18n: true
+            collapsed: true
+            fields:
+              - { label: Título, name: title, widget: string, i18n: true }
+              - { label: Introducción, name: intro, widget: string, i18n: true }
+              - label: Pasos
+                name: steps
+                widget: list
+                i18n: duplicate
+                summary: "{{fields.name}}"
+                fields:
+                  - { label: Nombre, name: name, widget: string, i18n: true }
+                  - { label: Nota, name: note, widget: string, i18n: true }
+                  - { label: Es el tramo del túnel, name: tunnel, widget: boolean, i18n: duplicate, default: false, required: false }
+                  - { label: Es la Raspberry Pi, name: pi, widget: boolean, i18n: duplicate, default: false, required: false }
+
+          - label: Metadatos de la página
+            name: meta
+            widget: object
+            i18n: true
+            collapsed: true
+            fields:
+              - { label: Título de la pestaña, name: title, widget: string, i18n: true }
+              - { label: Descripción para buscadores, name: description, widget: text, i18n: true }
+              - { label: Archivo del PDF, name: pdf, widget: string, i18n: true, hint: "No cambiar salvo que cambie el nombre del PDF" }
+
+          - label: Textos de la interfaz
+            name: ui
+            widget: object
+            i18n: true
+            collapsed: true
+            fields:
+              - { label: "Enlace «saltar al contenido»", name: skip, widget: string, i18n: true }
+              - { label: Etiqueta del menú, name: navLabel, widget: string, i18n: true }
+              - { label: Etiqueta del selector de idioma, name: langLabel, widget: string, i18n: true }
+              - { label: Botón de tema, name: themeToggle, widget: string, i18n: true }
+              - { label: Sección Sobre mí, name: about, widget: string, i18n: true }
+              - { label: Sección Experiencia, name: experience, widget: string, i18n: true }
+              - { label: Sección Formación, name: education, widget: string, i18n: true }
+              - { label: Sección Idiomas, name: languages, widget: string, i18n: true }
+              - { label: Sección Stack, name: skills, widget: string, i18n: true }
+              - { label: Sección Proyectos, name: projects, widget: string, i18n: true }
+              - { label: Sección Contacto, name: contact, widget: string, i18n: true }
+              - { label: Botón de escribir, name: writeMe, widget: string, i18n: true }
+              - { label: Botón de descargar el PDF, name: downloadPdf, widget: string, i18n: true }
+              - { label: Etiqueta de las tecnologías, name: stackLabel, widget: string, i18n: true }
+              - { label: Pie de la web, name: footer, widget: string, i18n: true }
+              - label: Datos del servidor
+                name: live
+                widget: object
+                i18n: true
+                fields:
+                  - { label: Etiqueta del bloque, name: label, widget: string, i18n: true }
+                  - { label: CPU, name: cpu, widget: string, i18n: true }
+                  - { label: Tiempo encendida, name: uptime, widget: string, i18n: true }
+                  - { label: Visitas, name: visits, widget: string, i18n: true }
+                  - { label: Último despliegue, name: deployed, widget: string, i18n: true }
+                  - { label: Palabra «días», name: days, widget: string, i18n: true }
+              - label: PDF
+                name: print
+                widget: object
+                i18n: true
+                fields:
+                  - { label: Nota del pie, name: note, widget: string, i18n: true }
+                  - { label: Palabra «Actualizado», name: updated, widget: string, i18n: true }

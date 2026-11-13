@@ -4,6 +4,7 @@ Cada `git push` a `main` ejecuta `.github/workflows/deploy.yml`:
 
 1. **Build y controles de calidad**, en todos los push y pull requests:
    - los datos en español e inglés coinciden (`scripts/check-data.mjs`);
+   - el panel de edición cubre todos los campos de los datos (`scripts/check-cms.mjs`);
    - la web y los dos PDF se generan, y cada PDF cabe en una página;
    - no hay enlaces internos rotos (lychee);
    - Lighthouse: accesibilidad ≥ 95, SEO ≥ 90 y buenas prácticas ≥ 90; rendimiento < 90 solo avisa.

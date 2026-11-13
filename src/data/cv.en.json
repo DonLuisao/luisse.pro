@@ -30,14 +30,13 @@
     "downloadPdf": "Download CV (PDF)",
     "print": {
       "note": "Generated from the same data as luisse.pro, which is also available in Spanish.",
-      "updated": "Updated",
-      "web": "Website"
+      "updated": "Updated"
     }
   },
   "basics": {
     "name": "Luis Sánchez Elvira",
     "role": "L1/L2 IT support and junior developer",
-    "summary": "Two years of L1/L2 support at Telefónica Tech and the Spanish Ministry of Foreign Affairs. I finish my Computer Engineering degree in 2027 and I am looking for a role in systems or development.",
+    "summary": "IT professional with L1/L2 support experience at Telefónica Tech and the Spanish Ministry of Foreign Affairs, and web development experience with ASP.NET and JavaScript. I finish my Computer Engineering degree in 2027 and I am looking for a junior role in support, systems or development.",
     "location": "Madrid, Spain",
     "availability": "Open to new opportunities",
     "email": "luis@luisse.pro",
@@ -55,9 +54,9 @@
     "headline": "Systems, support and code."
   },
   "about": [
-    "I have over two years of experience in L1/L2 IT support. At Minsait I resolved 10 to 15 L2 incidents a day for Telefónica Tech, with SLA compliance above 95%. At Ibermática I supported more than 1,000 users at the Spanish Ministry of Foreign Affairs, in a high-security environment.",
-    "I have also worked in web development with ASP.NET, C#, JavaScript and SQL Server, maintaining and extending internal applications in production.",
-    "I like building things that work and understanding why the ones that don't are failing. This site, for example, is hosted by me."
+    "I have worked in L1/L2 support in demanding corporate environments. At Minsait I resolved 10 to 15 L2 incidents a day for Telefónica Tech, with SLA compliance above 95%, and at Ibermática I supported more than 1,000 users at the Spanish Ministry of Foreign Affairs, in an environment with strict security requirements.",
+    "I have also built internal web applications with ASP.NET (C#), JavaScript and SQL Server, working on production code with Git and peer code review.",
+    "I am studying for a BSc in Computer Engineering, with two distinctions with honours, and preparing for the Cisco CCNA. I like building things that work and understanding why the ones that don't are failing: this site, for example, is hosted by me."
   ],
   "experience": [
     {
@@ -68,36 +67,46 @@
       "bullets": []
     },
     {
+      "company": "Universidad",
+      "role": "Web developer intern, Software Development Department",
+      "period": "Feb 2024 – May 2024",
+      "current": false,
+      "bullets": [
+        "Developed and maintained internal applications (intranet and academic management) in ASP.NET (C#) with a JavaScript SPA frontend.",
+        "Built new features and fixed bugs in production code, including SQL Server queries and data modelling.",
+        "Worked in a team using Git version control and peer code review."
+      ]
+    },
+    {
       "company": "Minsait",
       "role": "L2 support, Telefónica Tech project",
-      "period": "",
+      "period": "Jul 2023 – Sep 2023",
+      "current": false,
       "bullets": [
-        "Resolved 10 to 15 L2 incidents a day.",
-        "SLA compliance above 95%."
+        "Resolved 10 to 15 L2 incidents a day on Telefónica Tech products (background music, fleet and content management), with SLA compliance above 95%.",
+        "Provided technical support and mentoring to L1 colleagues and on-site technicians, reducing unnecessary escalations.",
+        "Managed and tracked tickets in Jira and EasyVista."
       ]
     },
     {
       "company": "Ibermática",
-      "role": "L1/L2 service desk, Spanish Ministry of Foreign Affairs (MAEC)",
-      "period": "",
+      "role": "L1/L2 service desk, client: Spanish Ministry of Foreign Affairs (MAEC)",
+      "period": "Mar 2023 – Jun 2023",
+      "current": false,
       "bullets": [
-        "Supported more than 1,000 users.",
-        "Worked in a high-security environment."
+        "Provided L1/L2 support to more than 1,000 MAEC users, in an environment with strict security requirements.",
+        "Administered Active Directory (users, groups and permissions) and provided advanced Microsoft 365 support.",
+        "Installed and maintained corporate hardware: printers, fingerprint readers and peripherals."
       ]
     },
     {
-      "company": "ASLAM New IT",
-      "role": "Support and development",
-      "period": "",
-      "bullets": []
-    },
-    {
-      "company": "Universidad Francisco de Vitoria",
-      "role": "Web development intern",
-      "period": "",
+      "company": "Aslam New IT",
+      "role": "Programmer analyst intern and technical support",
+      "period": "Oct 2020 – Jun 2022",
+      "current": false,
       "bullets": [
-        "Maintained and extended internal applications in production.",
-        "ASP.NET, C#, JavaScript and SQL Server."
+        "Programmer analyst (Mar 2022 – Jun 2022): resolved software incidents, diagnosed issues with SQL queries and tracked bugs in Jira.",
+        "Technical support (Oct 2020 – Nov 2021): on-site and remote support to internal users in Spanish and English, device imaging with SCCM and basic Active Directory administration."
       ]
     }
   ],
@@ -105,16 +114,16 @@
     {
       "title": "BSc in Computer Engineering",
       "detail": "Universidad Alfonso X el Sabio. Two distinctions with honours.",
-      "period": "in progress, graduating June 2027"
+      "period": "in progress, graduating 2027"
     },
     {
       "title": "Higher vocational diploma in Cross-Platform Application Development (DAM)",
-      "detail": "",
+      "detail": "Centro IFP",
       "period": "2021 – 2023"
     },
     {
       "title": "Vocational diploma in Microcomputer Systems and Networks (SMR)",
-      "detail": "",
+      "detail": "Centro IFP",
       "period": "2019 – 2021"
     },
     {
@@ -135,14 +144,14 @@
   ],
   "skills": [
     {
-      "group": "Languages",
+      "group": "Development",
       "items": [
         {
           "name": "JavaScript",
           "level": "Intermediate"
         },
         {
-          "name": "C#",
+          "name": "C# / .NET (ASP.NET)",
           "level": "Intermediate"
         },
         {
@@ -154,16 +163,7 @@
           "level": "Intermediate"
         },
         {
-          "name": "SQL",
-          "level": "Intermediate"
-        }
-      ]
-    },
-    {
-      "group": "Frameworks and databases",
-      "items": [
-        {
-          "name": ".NET / ASP.NET",
+          "name": "SQL (SQL Server, SQLite)",
           "level": "Intermediate"
         },
         {
@@ -171,22 +171,18 @@
           "level": "Intermediate"
         },
         {
-          "name": "SQL Server",
+          "name": "Git / GitHub",
           "level": "Intermediate"
-        },
-        {
-          "name": "SQLite",
-          "level": "Intermediate"
-        },
-        {
-          "name": "Astro",
-          "level": "Basic"
         }
       ]
     },
     {
       "group": "Systems and support",
       "items": [
+        {
+          "name": "Windows 10/11",
+          "level": "Advanced"
+        },
         {
           "name": "Active Directory",
           "level": "Advanced"
@@ -196,21 +192,38 @@
           "level": "Advanced"
         },
         {
-          "name": "Windows 10/11",
-          "level": "Advanced"
-        },
-        {
-          "name": "SCCM",
+          "name": "SCCM and device imaging",
           "level": "Intermediate"
         },
         {
           "name": "Linux",
+          "level": "User"
+        },
+        {
+          "name": "Docker",
           "level": "Basic"
         }
       ]
     },
     {
-      "group": "Tools and networking",
+      "group": "Networking",
+      "items": [
+        {
+          "name": "TCP/IP and the OSI model",
+          "level": "In training (CCNA)"
+        },
+        {
+          "name": "Subnetting and VLANs",
+          "level": "In training (CCNA)"
+        },
+        {
+          "name": "Routing and switching",
+          "level": "In training (CCNA)"
+        }
+      ]
+    },
+    {
+      "group": "Ticketing",
       "items": [
         {
           "name": "Jira",
@@ -219,18 +232,6 @@
         {
           "name": "EasyVista",
           "level": "Advanced"
-        },
-        {
-          "name": "Git / GitHub",
-          "level": "Intermediate"
-        },
-        {
-          "name": "Docker",
-          "level": "Basic"
-        },
-        {
-          "name": "Networking (CCNA)",
-          "level": "In training"
         }
       ]
     }
@@ -267,15 +268,17 @@
     {
       "name": "This site",
       "featured": false,
-      "url": "",
-      "description": "A static site generated from a single data file per language. It runs on a Raspberry Pi 4 with Docker and Caddy, and reaches the internet through a Cloudflare tunnel, with no open ports.",
+      "url": "https://github.com/DonLuisao/luisse.pro",
+      "description": "A static site generated from a single data file per language, with quality checks and automatic deployment on GitHub Actions. It runs on a Raspberry Pi 4 with Docker and Caddy, behind a Cloudflare tunnel with no open ports.",
       "role": "Design, development and self-hosting.",
       "stack": [
         "Astro",
         "CSS",
+        "GitHub Actions",
         "Docker",
         "Caddy",
-        "Cloudflare Tunnel"
+        "Cloudflare Tunnel",
+        "Tailscale"
       ]
     }
   ],

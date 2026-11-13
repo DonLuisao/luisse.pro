@@ -12,18 +12,16 @@ Todo el contenido está en dos archivos, uno por idioma:
 Ahí están los textos del CV y también los rótulos de la interfaz (clave `ui`).
 Los campos vacíos (`"period": ""`, `"bullets": []`, `"url": ""`) no se pintan.
 
-Pendiente de rellenar:
-
-- Fechas (`period`) de Minsait, Ibermática, ASLAM New IT y Universidad Francisco de Vitoria.
-- Tareas (`bullets`) de NTT DATA y ASLAM New IT.
-- Orden cronológico de la experiencia, de más reciente a más antigua.
+Se pueden editar a mano o con el panel de https://luisse.pro/admin/:
+[docs/panel.md](docs/panel.md).
 
 ## Comandos
 
 ```bash
 npm install       # una sola vez
 npm run dev       # servidor local en http://localhost:4321
-npm run build     # genera el sitio y los dos PDF en dist/
+npm run check     # controles de los datos y del panel
+npm run build     # controles, sitio y los dos PDF en dist/
 npm run build:site  # solo el sitio, sin PDF (más rápido)
 npm run preview   # sirve dist/ para revisarlo
 ```
@@ -83,7 +81,8 @@ src/
   layouts/      Base.astro, <head> y metadatos
   pages/        index.astro (es) y en/index.astro (en)
   styles/       global.css (web) y print.css (PDF)
-scripts/        check-data.mjs (control de los datos) y pdf.mjs (genera los PDF)
+scripts/        check-data.mjs y check-cms.mjs (controles) y pdf.mjs (genera los PDF)
+public/admin/   panel de edición (Sveltia CMS)
 deploy/         Caddyfile y docker-compose.yml del servidor en la Pi
-docs/           despliegue.md
+docs/           despliegue.md y panel.md
 ```

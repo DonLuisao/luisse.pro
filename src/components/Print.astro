@@ -6,6 +6,11 @@ const { cv, lang } = Astro.props;
 const { basics, ui } = cv;
 const host = (url) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const today = new Intl.DateTimeFormat(lang, { year: 'numeric', month: 'long' }).format(new Date());
+// El pie va en el margen inferior de la página: no quita espacio al contenido
+const pageFooter = `@page {
+  @bottom-left { content: ${JSON.stringify(ui.print.note)}; }
+  @bottom-right { content: ${JSON.stringify(`${ui.print.updated}: ${today}`)}; }
+}`;
 ---
 <!doctype html>
 <html lang={lang}>
@@ -13,6 +18,7 @@ const today = new Intl.DateTimeFormat(lang, { year: 'numeric', month: 'long' }).
     <meta charset="utf-8" />
     <meta name="robots" content="noindex" />
     <title>{basics.name} – CV</title>
+    <style is:inline set:html={pageFooter}></style>
   </head>
   <body>
     <header class="head">
@@ -20,93 +26,76 @@ const today = new Intl.DateTimeFormat(lang, { year: 'numeric', month: 'long' }).
         <h1>{basics.name}</h1>
         <p class="role">{basics.role}</p>
       </div>
-      <p class="where">{basics.location}<br />{basics.availability}</p>
+      <ul class="contact">
+        <li>{basics.location}</li>
+        <li><a href={`mailto:${basics.email}`}>{basics.email}</a></li>
+        {basics.phone && <li>{basics.phone}</li>}
+        <li><a href="https://luisse.pro">luisse.pro</a></li>
+        {basics.links.map((l) => <li><a href={l.url}>{host(l.url)}</a></li>)}
+      </ul>
     </header>
 
-    <div class="cols">
-      <aside class="side">
-        <section>
-          <h2>{ui.contact}</h2>
-          <ul class="contact">
-            <li><a href={`mailto:${basics.email}`}>{basics.email}</a></li>
-            {basics.phone && <li>{basics.phone}</li>}
-            <li><a href="https://luisse.pro">luisse.pro</a></li>
-            {basics.links.map((l) => <li><a href={l.url}>{host(l.url)}</a></li>)}
-          </ul>
-        </section>
+    <section>
+      <h2>{ui.about}</h2>
+      <p>{basics.summary}</p>
+    </section>
 
-        <section>
-          <h2>{ui.languages}</h2>
-          <dl class="pairs">
-            {cv.languages.map((l) => <div><dt>{l.name}</dt><dd>{l.level}</dd></div>)}
-          </dl>
-        </section>
+    <section>
+      <h2>{ui.experience}</h2>
+      {cv.experience.map((job) => (
+        <article class="item">
+          <div class="item-head">
+            <h3>{job.company} <span class="muted">{job.role}</span></h3>
+            {job.period && <span class="period">{job.period}</span>}
+          </div>
+          {job.bullets?.length > 0 && <ul class="dots">{job.bullets.map((b) => <li>{b}</li>)}</ul>}
+        </article>
+      ))}
+    </section>
 
-        <section>
-          <h2>{ui.skills}</h2>
-          {cv.skills.map((g) => (
-            <div class="group">
-              <h3>{g.group}</h3>
-              <dl class="pairs">
-                {g.items.map((s) => <div><dt>{s.name}</dt><dd>{s.level}</dd></div>)}
-              </dl>
-            </div>
-          ))}
-        </section>
-      </aside>
+    <section>
+      <h2>{ui.education}</h2>
+      {cv.education.map((e) => (
+        <article class="item tight">
+          <div class="item-head">
+            <h3>{e.title} {e.detail && <span class="muted">{e.detail}</span>}</h3>
+            {e.period && <span class="period">{e.period}</span>}
+          </div>
+        </article>
+      ))}
+    </section>
 
-      <main class="main">
-        <section>
-          <h2>{ui.about}</h2>
-          <p>{basics.summary}</p>
-        </section>
+    <section>
+      <h2>{ui.projects}</h2>
+      {cv.projects.map((p) => (
+        <article class="item">
+          <div class="item-head">
+            <h3>{p.name} <span class="muted">{p.stack.join(', ')}</span></h3>
+            {p.url && <a class="period" href={p.url}>{host(p.url)}</a>}
+          </div>
+          <p>{p.description}</p>
+        </article>
+      ))}
+    </section>
 
-        <section>
-          <h2>{ui.experience}</h2>
-          {cv.experience.map((job) => (
-            <article class="item">
-              <div class="item-head">
-                <h3>{job.company}</h3>
-                {job.period && <span class="period">{job.period}</span>}
-              </div>
-              <p class="muted">{job.role}</p>
-              {job.bullets?.length > 0 && <ul class="dots">{job.bullets.map((b) => <li>{b}</li>)}</ul>}
-            </article>
-          ))}
-        </section>
+    <section>
+      <h2>{ui.skills}</h2>
+      <dl class="skills">
+        {cv.skills.map((g) => (
+          <div>
+            <dt>{g.group}</dt>
+            <dd>{g.items.map((s) => s.name).join(', ')}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
 
-        <section>
-          <h2>{ui.education}</h2>
-          {cv.education.map((e) => (
-            <article class="item">
-              <div class="item-head">
-                <h3>{e.title}</h3>
-                {e.period && <span class="period">{e.period}</span>}
-              </div>
-              {e.detail && <p class="muted">{e.detail}</p>}
-            </article>
-          ))}
-        </section>
+    <section>
+      <h2>{ui.languages}</h2>
+      <p class="langs">
+        {cv.languages.map((l) => <span><strong>{l.name}</strong> {l.level}</span>)}
+      </p>
+    </section>
 
-        <section>
-          <h2>{ui.projects}</h2>
-          {cv.projects.map((p) => (
-            <article class="item">
-              <div class="item-head">
-                <h3>{p.name}</h3>
-                {p.url && <a class="period" href={p.url}>{host(p.url)}</a>}
-              </div>
-              <p>{p.description}</p>
-              <p class="muted">{p.stack.join(', ')}</p>
-            </article>
-          ))}
-        </section>
-      </main>
-    </div>
-
-    <footer class="foot">
-      <span>{ui.print.note}</span>
-      <span>{ui.print.updated}: {today}</span>
-    </footer>
   </body>
 </html>

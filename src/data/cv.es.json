@@ -30,14 +30,13 @@
     "downloadPdf": "Descargar CV en PDF",
     "print": {
       "note": "Generado desde los mismos datos que luisse.pro, donde también está en inglés.",
-      "updated": "Actualizado",
-      "web": "Web"
+      "updated": "Actualizado"
     }
   },
   "basics": {
     "name": "Luis Sánchez Elvira",
     "role": "Soporte IT N1/N2 y desarrollador junior",
-    "summary": "Dos años de soporte N1/N2 en Telefónica Tech y el Ministerio de Asuntos Exteriores. Termino Ingeniería Informática en 2027 y busco un puesto en sistemas o desarrollo.",
+    "summary": "Profesional de IT con experiencia en soporte N1/N2 en Telefónica Tech y el Ministerio de Asuntos Exteriores, y en desarrollo web con ASP.NET y JavaScript. Termino Ingeniería Informática en 2027 y busco un puesto junior en soporte, sistemas o desarrollo.",
     "location": "Madrid",
     "availability": "Disponible para nuevas oportunidades",
     "email": "luis@luisse.pro",
@@ -55,9 +54,9 @@
     "headline": "Sistemas, soporte y código."
   },
   "about": [
-    "Tengo más de dos años de experiencia en soporte IT N1/N2. En Minsait resolvía entre 10 y 15 incidencias N2 al día para Telefónica Tech, con un cumplimiento de SLA superior al 95 %. En Ibermática di soporte a más de 1.000 usuarios del Ministerio de Asuntos Exteriores, en un entorno de alta seguridad.",
-    "También he trabajado en desarrollo web con ASP.NET, C#, JavaScript y SQL Server, manteniendo y evolucionando aplicaciones internas en producción.",
-    "Me gusta construir cosas que funcionan y entender por qué fallan las que no. Esta web, por ejemplo, la alojo yo mismo."
+    "He trabajado en soporte N1/N2 en entornos corporativos exigentes. En Minsait resolvía entre 10 y 15 incidencias N2 al día para Telefónica Tech, con un cumplimiento de SLA superior al 95 %, y en Ibermática di soporte a más de 1.000 usuarios del Ministerio de Asuntos Exteriores, en un entorno con altos requisitos de seguridad.",
+    "También he desarrollado aplicaciones web internas con ASP.NET (C#), JavaScript y SQL Server, trabajando sobre código en producción con Git y revisión de código entre compañeros.",
+    "Curso el Grado en Ingeniería Informática, con dos matrículas de honor, y preparo la certificación Cisco CCNA. Me gusta construir cosas que funcionan y entender por qué fallan las que no: esta web, por ejemplo, la alojo yo mismo."
   ],
   "experience": [
     {
@@ -68,36 +67,46 @@
       "bullets": []
     },
     {
+      "company": "Universidad",
+      "role": "Desarrollador web en prácticas, Departamento de Desarrollo de Software",
+      "period": "feb 2024 – may 2024",
+      "current": false,
+      "bullets": [
+        "Desarrollo y mantenimiento de aplicaciones internas (intranet y gestión académica) en ASP.NET (C#) con frontend SPA en JavaScript.",
+        "Nuevas funcionalidades y corrección de errores sobre código en producción, incluidas consultas y modelado en SQL Server.",
+        "Trabajo en equipo con control de versiones en Git y revisión de código entre compañeros."
+      ]
+    },
+    {
       "company": "Minsait",
       "role": "Soporte N2, proyecto Telefónica Tech",
-      "period": "",
+      "period": "jul 2023 – sep 2023",
+      "current": false,
       "bullets": [
-        "Resolución de 10 a 15 incidencias N2 diarias.",
-        "Cumplimiento de SLA superior al 95 %."
+        "Resolución de 10 a 15 incidencias N2 diarias sobre productos de Telefónica Tech (hilo musical, gestión de flotas y de contenidos), con cumplimiento de SLA superior al 95 %.",
+        "Apoyo técnico y mentorización a compañeros de N1 y técnicos on-site, reduciendo escalados innecesarios.",
+        "Gestión y trazabilidad de tickets con Jira y EasyVista."
       ]
     },
     {
       "company": "Ibermática",
-      "role": "CAU N1/N2, Ministerio de Asuntos Exteriores (MAEC)",
-      "period": "",
+      "role": "CAU N1/N2, cliente Ministerio de Asuntos Exteriores (MAEC)",
+      "period": "mar 2023 – jun 2023",
+      "current": false,
       "bullets": [
-        "Soporte a más de 1.000 usuarios.",
-        "Trabajo en un entorno de alta seguridad."
+        "Atención N1/N2 a más de 1.000 usuarios del MAEC, en un entorno con altos requisitos de seguridad.",
+        "Administración de Active Directory (usuarios, grupos y permisos) y soporte avanzado de Microsoft 365.",
+        "Instalación y mantenimiento de hardware corporativo: impresoras, lectores de huella y periféricos."
       ]
     },
     {
-      "company": "ASLAM New IT",
-      "role": "Soporte y desarrollo",
-      "period": "",
-      "bullets": []
-    },
-    {
-      "company": "Universidad Francisco de Vitoria",
-      "role": "Prácticas de desarrollo web",
-      "period": "",
+      "company": "Aslam New IT",
+      "role": "Analista programador en prácticas y soporte técnico",
+      "period": "oct 2020 – jun 2022",
+      "current": false,
       "bullets": [
-        "Mantenimiento y evolución de aplicaciones internas en producción.",
-        "ASP.NET, C#, JavaScript y SQL Server."
+        "Analista programador (mar 2022 – jun 2022): resolución de incidencias de software, diagnóstico con consultas SQL y seguimiento de bugs en Jira.",
+        "Soporte técnico (oct 2020 – nov 2021): atención presencial y remota a usuarios internos en español e inglés, maquetación de equipos con SCCM y administración básica de Active Directory."
       ]
     }
   ],
@@ -105,16 +114,16 @@
     {
       "title": "Grado en Ingeniería Informática",
       "detail": "Universidad Alfonso X el Sabio. Dos matrículas de honor.",
-      "period": "en curso, fin en junio de 2027"
+      "period": "en curso, fin previsto en 2027"
     },
     {
       "title": "CFGS Desarrollo de Aplicaciones Multiplataforma (DAM)",
-      "detail": "",
+      "detail": "Centro IFP",
       "period": "2021 – 2023"
     },
     {
       "title": "CFGM Sistemas Microinformáticos y Redes (SMR)",
-      "detail": "",
+      "detail": "Centro IFP",
       "period": "2019 – 2021"
     },
     {
@@ -135,14 +144,14 @@
   ],
   "skills": [
     {
-      "group": "Lenguajes",
+      "group": "Desarrollo",
       "items": [
         {
           "name": "JavaScript",
           "level": "Intermedio"
         },
         {
-          "name": "C#",
+          "name": "C# / .NET (ASP.NET)",
           "level": "Intermedio"
         },
         {
@@ -154,16 +163,7 @@
           "level": "Intermedio"
         },
         {
-          "name": "SQL",
-          "level": "Intermedio"
-        }
-      ]
-    },
-    {
-      "group": "Frameworks y bases de datos",
-      "items": [
-        {
-          "name": ".NET / ASP.NET",
+          "name": "SQL (SQL Server, SQLite)",
           "level": "Intermedio"
         },
         {
@@ -171,22 +171,18 @@
           "level": "Intermedio"
         },
         {
-          "name": "SQL Server",
+          "name": "Git / GitHub",
           "level": "Intermedio"
-        },
-        {
-          "name": "SQLite",
-          "level": "Intermedio"
-        },
-        {
-          "name": "Astro",
-          "level": "Básico"
         }
       ]
     },
     {
       "group": "Sistemas y soporte",
       "items": [
+        {
+          "name": "Windows 10/11",
+          "level": "Avanzado"
+        },
         {
           "name": "Active Directory",
           "level": "Avanzado"
@@ -196,21 +192,38 @@
           "level": "Avanzado"
         },
         {
-          "name": "Windows 10/11",
-          "level": "Avanzado"
-        },
-        {
-          "name": "SCCM",
+          "name": "SCCM y maquetación de equipos",
           "level": "Intermedio"
         },
         {
           "name": "Linux",
+          "level": "Usuario"
+        },
+        {
+          "name": "Docker",
           "level": "Básico"
         }
       ]
     },
     {
-      "group": "Herramientas y redes",
+      "group": "Redes",
+      "items": [
+        {
+          "name": "TCP/IP y modelo OSI",
+          "level": "En formación (CCNA)"
+        },
+        {
+          "name": "Subnetting y VLANs",
+          "level": "En formación (CCNA)"
+        },
+        {
+          "name": "Routing y switching",
+          "level": "En formación (CCNA)"
+        }
+      ]
+    },
+    {
+      "group": "Ticketing",
       "items": [
         {
           "name": "Jira",
@@ -219,18 +232,6 @@
         {
           "name": "EasyVista",
           "level": "Avanzado"
-        },
-        {
-          "name": "Git / GitHub",
-          "level": "Intermedio"
-        },
-        {
-          "name": "Docker",
-          "level": "Básico"
-        },
-        {
-          "name": "Redes (CCNA)",
-          "level": "En formación"
         }
       ]
     }
@@ -267,15 +268,17 @@
     {
       "name": "Esta web",
       "featured": false,
-      "url": "",
-      "description": "Sitio estático generado desde un único archivo de datos por idioma. Está alojado en una Raspberry Pi 4 con Docker y Caddy, y sale a internet por un túnel de Cloudflare, sin puertos abiertos.",
+      "url": "https://github.com/DonLuisao/luisse.pro",
+      "description": "Sitio estático generado desde un único archivo de datos por idioma, con controles de calidad y despliegue automático en GitHub Actions. Se sirve desde una Raspberry Pi 4 con Docker y Caddy, a través de un túnel de Cloudflare y sin puertos abiertos.",
       "role": "Diseño, desarrollo y autoalojamiento.",
       "stack": [
         "Astro",
         "CSS",
+        "GitHub Actions",
         "Docker",
         "Caddy",
-        "Cloudflare Tunnel"
+        "Cloudflare Tunnel",
+        "Tailscale"
       ]
     }
   ],

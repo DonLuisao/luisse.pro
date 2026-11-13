@@ -32,6 +32,9 @@ jobs:
       - name: Comprobar los datos del CV (español e inglés)
         run: npm run check:data
 
+      - name: Comprobar que el panel cubre todos los campos
+        run: npm run check:cms
+
       - name: Instalar Chromium para generar el PDF
         run: npx playwright install --with-deps chromium
 
