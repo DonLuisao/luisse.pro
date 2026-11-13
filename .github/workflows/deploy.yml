@@ -1,0 +1,106 @@
+name: Comprobar y desplegar
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Nunca dos despliegues a la vez; si llegan varios push seguidos, se encolan
+concurrency:
+  group: despliegue-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build y controles de calidad
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Comprobar los datos del CV (español e inglés)
+        run: npm run check:data
+
+      - name: Instalar Chromium para generar el PDF
+        run: npx playwright install --with-deps chromium
+
+      - name: Generar la web y los PDF
+        run: npm run build
+
+      - name: Buscar enlaces rotos
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --offline --no-progress --root-dir "${{ github.workspace }}/dist" "dist/**/*.html"
+          fail: true
+
+      - name: Lighthouse (accesibilidad, SEO, buenas prácticas y rendimiento)
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Guardar la web generada
+        uses: actions/upload-artifact@v5
+        with:
+          name: sitio
+          path: dist/
+          retention-days: 7
+
+  deploy:
+    name: Desplegar en la Raspberry Pi
+    needs: build
+    # Solo en main, y solo cuando la variable DEPLOY_ENABLED del repo vale "true"
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: produccion
+      url: https://luisse.pro
+    steps:
+      - name: Descargar la web generada
+        uses: actions/download-artifact@v5
+        with:
+          name: sitio
+          path: dist
+
+      - name: Entrar en la red de Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Preparar la clave SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          PI_KNOWN_HOSTS: ${{ secrets.PI_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$PI_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Copiar la web a la Pi
+        env:
+          PI_USER: ${{ secrets.PI_USER }}
+          PI_HOST: ${{ secrets.PI_HOST }}
+        # En la Pi, esta clave solo puede escribir en ~/web/site (rrsync), por eso el destino va vacío
+        run: rsync -rltvz --delete dist/ "$PI_USER@$PI_HOST:"
+
+      - name: Comprobar que la web responde
+        run: |
+          sleep 5
+          curl --fail --silent --show-error --output /dev/null https://luisse.pro/
+          curl --fail --silent --show-error --output /dev/null https://luisse.pro/en/
+          echo "luisse.pro responde correctamente."

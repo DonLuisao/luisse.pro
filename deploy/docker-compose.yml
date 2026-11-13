@@ -1,0 +1,16 @@
+# Copia de referencia del ~/web/docker-compose.yml de la Raspberry Pi.
+# El token del túnel va en ~/web/.env (TUNNEL_TOKEN=...), nunca en el repo.
+services:
+  web:
+    image: caddy:2
+    restart: unless-stopped
+    volumes:
+      - ./site:/usr/share/caddy:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}

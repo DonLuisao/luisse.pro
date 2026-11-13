@@ -1,0 +1,226 @@
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("/fonts/InstrumentSans-Regular.woff") format("woff");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("/fonts/InstrumentSans-Bold.woff") format("woff");
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "Red Hat Mono";
+  src: url("/fonts/RedHatMono-Regular.woff") format("woff");
+  font-weight: 400;
+}
+
+@page {
+  size: A4;
+  margin: 12mm 14mm 11mm;
+}
+
+:root {
+  --ink: #0e1b2e;
+  --muted: #4a586c;
+  --line: #d3d9e0;
+  --cable: #f5b700;
+  --tint: #eef1f4;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+body {
+  font-family: "Instrument Sans", system-ui, sans-serif;
+  font-size: 8.9pt;
+  line-height: 1.36;
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+/* Cabecera */
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 3.5mm;
+  border-bottom: 2.2pt solid var(--ink);
+}
+
+h1 {
+  font-size: 23pt;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.role {
+  margin-top: 1.6mm;
+  font-size: 12pt;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.where {
+  text-align: right;
+  color: var(--muted);
+}
+
+/* Columnas */
+.cols {
+  display: grid;
+  grid-template-columns: 58mm 1fr;
+  gap: 0 7mm;
+  margin-top: 5mm;
+}
+
+.side {
+  background: var(--tint);
+  border-radius: 3mm;
+  padding: 4mm 4mm 1mm;
+  align-self: start;
+}
+
+section {
+  margin-bottom: 3.4mm;
+}
+
+h2 {
+  font-size: 10.5pt;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.8mm;
+}
+
+/* La marca amarilla: el mismo cable que la web */
+h2::after {
+  content: "";
+  display: block;
+  width: 7mm;
+  height: 1.1mm;
+  margin-top: 0.8mm;
+  background: var(--cable);
+  border-radius: 1mm;
+}
+
+h3 {
+  font-size: 9.6pt;
+}
+
+.contact {
+  font-size: 8.6pt;
+}
+
+.contact li + li {
+  margin-top: 0.4mm;
+}
+
+.group + .group {
+  margin-top: 2.4mm;
+}
+
+.group h3 {
+  margin-bottom: 0.6mm;
+}
+
+.pairs > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 2mm;
+  padding: 0.35mm 0;
+  border-bottom: 0.5pt solid var(--line);
+}
+
+.pairs dd {
+  color: var(--muted);
+}
+
+/* Contenido principal */
+.item {
+  break-inside: avoid;
+}
+
+.item + .item {
+  margin-top: 2mm;
+}
+
+.item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 3mm;
+}
+
+.period {
+  font-family: "Red Hat Mono", ui-monospace, monospace;
+  font-size: 8.2pt;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.dots {
+  margin-top: 0.8mm;
+}
+
+.dots li {
+  position: relative;
+  padding-left: 3.2mm;
+}
+
+.dots li::before {
+  content: "";
+  position: absolute;
+  left: 0.4mm;
+  top: 0.62em;
+  width: 1.2mm;
+  height: 1.2mm;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+/* Pie */
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 6mm;
+  margin-top: 0;
+  padding-top: 2mm;
+  border-top: 0.5pt solid var(--line);
+  font-size: 7.8pt;
+  color: var(--muted);
+}
+
+/* En pantalla, que se vea como una hoja */
+@media screen {
+  html {
+    background: #9aa6b4;
+  }
+
+  body {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 8mm auto;
+    padding: 12mm 14mm 11mm;
+    background: #fff;
+  }
+}

@@ -1,0 +1,8 @@
+---
+import Base from '../../layouts/Base.astro';
+import CV from '../../components/CV.astro';
+import cv from '../../data/cv.en.json';
+---
+<Base cv={cv} lang="en">
+  <CV cv={cv} lang="en" />
+</Base>

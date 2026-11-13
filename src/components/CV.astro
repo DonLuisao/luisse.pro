@@ -1,0 +1,221 @@
+---
+const { cv, lang } = Astro.props;
+const { basics, ui, route } = cv;
+const builtAt = new Date().toISOString();
+// Cambiar a true cuando exista el servicio /api/status en la Pi (paso 5).
+// Mientras sea false, la página no lo pide y no genera errores 404.
+const liveStats = false;
+---
+<a class="skip" href="#main">{ui.skip}</a>
+
+<header class="bar">
+  <a class="bar-name" href={lang === 'es' ? '/' : '/en/'}>{basics.name}</a>
+  <nav aria-label={ui.navLabel}>
+    <a href="#experience">{ui.experience}</a>
+    <a href="#skills">{ui.skills}</a>
+    <a href="#projects">{ui.projects}</a>
+    <a href="#contact">{ui.contact}</a>
+  </nav>
+  <div class="bar-tools">
+    <div class="lang" role="group" aria-label={ui.langLabel}>
+      <a href="/" lang="es" hreflang="es" aria-current={lang === 'es' ? 'true' : undefined}>ES</a>
+      <span aria-hidden="true">/</span>
+      <a href="/en/" lang="en" hreflang="en" aria-current={lang === 'en' ? 'true' : undefined}>EN</a>
+    </div>
+    <button type="button" class="theme" id="theme-toggle" aria-label={ui.themeToggle} title={ui.themeToggle}>
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" />
+        <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <h1>{basics.headline}</h1>
+    <div class="hero-side">
+      <p class="hero-name">{basics.name}</p>
+      <p>{basics.summary}</p>
+      <p class="actions">
+        <a class="btn primary" href={`mailto:${basics.email}`}>{ui.writeMe}</a>
+        <a class="btn" href={cv.meta.pdf} download>{ui.downloadPdf}</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="route" aria-labelledby="route-title">
+    <h2 id="route-title">{route.title}</h2>
+    <p class="route-intro">{route.intro}</p>
+    <ol class="route-steps">
+      {route.steps.map((s) => (
+        <li class:list={['step', { tunnel: s.tunnel, pi: s.pi }]}>
+          <span class="node" aria-hidden="true">
+            {s.pi && (
+              <svg viewBox="0 0 44 40" width="44" height="40">
+                <rect width="44" height="40" rx="7" fill="currentColor" />
+                <rect class="chip" x="8" y="8" width="13" height="10" rx="2" />
+                <rect class="chip" x="25" y="8" width="11" height="24" rx="2" />
+                <rect class="chip" x="8" y="22" width="13" height="10" rx="2" />
+              </svg>
+            )}
+          </span>
+          <strong>{s.name}</strong>
+          <span class="step-note">{s.note}</span>
+        </li>
+      ))}
+    </ol>
+    <dl class="live" aria-label={ui.live.label} data-days={ui.live.days} data-lang={lang} data-stats={liveStats ? 'on' : 'off'}>
+      <div data-stat="cpu" hidden><dt>{ui.live.cpu}</dt><dd></dd></div>
+      <div data-stat="uptime" hidden><dt>{ui.live.uptime}</dt><dd></dd></div>
+      <div data-stat="visits" hidden><dt>{ui.live.visits}</dt><dd></dd></div>
+      <div data-stat="deployed"><dt>{ui.live.deployed}</dt><dd><time datetime={builtAt}>{builtAt.slice(0, 10)}</time></dd></div>
+    </dl>
+  </section>
+
+  <section class="block" id="about">
+    <h2>{ui.about}</h2>
+    <div class="body prose">
+      {cv.about.map((p) => <p>{p}</p>)}
+    </div>
+  </section>
+
+  <section class="block" id="experience">
+    <h2>{ui.experience}</h2>
+    <ol class="body trail">
+      {cv.experience.map((job) => (
+        <li class:list={['hop', { current: job.current }]}>
+          <div class="hop-head">
+            <h3>{job.company}</h3>
+            {job.period && <p class="period">{job.period}</p>}
+          </div>
+          <p class="hop-role">{job.role}</p>
+          {job.bullets && job.bullets.length > 0 && (
+            <ul>
+              {job.bullets.map((b) => <li>{b}</li>)}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="block" id="education">
+    <h2>{ui.education}</h2>
+    <div class="body">
+      <ul class="plain">
+        {cv.education.map((e) => (
+          <li>
+            <div class="hop-head">
+              <h3>{e.title}</h3>
+              {e.period && <p class="period">{e.period}</p>}
+            </div>
+            {e.detail && <p class="hop-role">{e.detail}</p>}
+          </li>
+        ))}
+      </ul>
+      <h3 class="sub">{ui.languages}</h3>
+      <dl class="pairs">
+        {cv.languages.map((l) => (
+          <div><dt>{l.name}</dt><dd>{l.level}</dd></div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <section class="block" id="skills">
+    <h2>{ui.skills}</h2>
+    <div class="body skills">
+      {cv.skills.map((g) => (
+        <div class="skill-group">
+          <h3>{g.group}</h3>
+          <dl class="pairs">
+            {g.items.map((s) => (
+              <div><dt>{s.name}</dt><dd>{s.level}</dd></div>
+            ))}
+          </dl>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="block" id="projects">
+    <h2>{ui.projects}</h2>
+    <div class="body projects">
+      {cv.projects.map((p) => (
+        <article class:list={['project', { featured: p.featured }]}>
+          <h3>{p.url ? <a href={p.url}>{p.name}</a> : p.name}</h3>
+          <p>{p.description}</p>
+          <p class="project-meta">{p.role}</p>
+          <p class="project-meta"><span class="sr">{ui.stackLabel}: </span>{p.stack.join(', ')}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="block" id="contact">
+    <h2>{ui.contact}</h2>
+    <div class="body">
+      <p class="mail"><a href={`mailto:${basics.email}`}>{basics.email}</a></p>
+      <ul class="links">
+        {basics.phone && <li><a href={`tel:${basics.phone.replace(/\s/g, '')}`}>{basics.phone}</a></li>}
+        {basics.links.map((l) => (
+          <li><a href={l.url} rel="me noopener">{l.label}</a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>{ui.footer}</p>
+</footer>
+
+<script>
+  // Tema claro / oscuro
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const current = root.dataset.theme || (systemDark ? 'dark' : 'light');
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch (e) {}
+  });
+
+  const live = document.querySelector<HTMLElement>('.live');
+  if (live) {
+    const lang = live.dataset.lang || 'es';
+
+    // "Último despliegue" en relativo, a partir de la fecha del build
+    const time = live.querySelector('time');
+    if (time) {
+      const mins = Math.round((Date.now() - new Date(time.dateTime).getTime()) / 60000);
+      const rtf = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
+      time.textContent =
+        mins < 60 ? rtf.format(-mins, 'minute')
+        : mins < 1440 ? rtf.format(-Math.round(mins / 60), 'hour')
+        : rtf.format(-Math.round(mins / 1440), 'day');
+    }
+
+    // Datos en vivo de la Pi. Si /api/status no existe todavía, no se muestra nada.
+    const show = (key: string, text: string) => {
+      const row = live.querySelector<HTMLElement>(`[data-stat="${key}"]`);
+      const dd = row?.querySelector('dd');
+      if (row && dd) {
+        dd.textContent = text;
+        row.hidden = false;
+      }
+    };
+    if (live.dataset.stats === 'on') fetch('/api/status')
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((s) => {
+        const nf = new Intl.NumberFormat(lang);
+        if (typeof s.cpu_temp_c === 'number') show('cpu', `${nf.format(Math.round(s.cpu_temp_c))} °C`);
+        if (typeof s.uptime_s === 'number') show('uptime', `${nf.format(Math.floor(s.uptime_s / 86400))} ${live.dataset.days}`);
+        if (typeof s.visits_30d === 'number') show('visits', nf.format(s.visits_30d));
+      })
+      .catch(() => {});
+  }
+</script>

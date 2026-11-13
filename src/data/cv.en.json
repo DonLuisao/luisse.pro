@@ -1,0 +1,306 @@
+{
+  "meta": {
+    "title": "Luis Sánchez Elvira | IT support and development",
+    "description": "CV of Luis Sánchez Elvira: L1/L2 IT support and junior developer based in Madrid. Experience, stack, projects and contact.",
+    "pdf": "/Luis-Sanchez-Elvira-CV-EN.pdf"
+  },
+  "ui": {
+    "skip": "Skip to content",
+    "navLabel": "Sections",
+    "langLabel": "Language",
+    "themeToggle": "Switch between light and dark theme",
+    "about": "About me",
+    "experience": "Experience",
+    "education": "Education",
+    "languages": "Languages",
+    "skills": "Stack",
+    "projects": "Projects",
+    "contact": "Contact",
+    "writeMe": "Email me",
+    "stackLabel": "Technologies",
+    "footer": "Built with Astro and served from a Raspberry Pi 4 at my home in Madrid.",
+    "live": {
+      "label": "Server data",
+      "cpu": "CPU",
+      "uptime": "Uptime",
+      "visits": "Visits, 30 days",
+      "deployed": "Last deploy",
+      "days": "days"
+    },
+    "downloadPdf": "Download CV (PDF)",
+    "print": {
+      "note": "Generated from the same data as luisse.pro, which is also available in Spanish.",
+      "updated": "Updated",
+      "web": "Website"
+    }
+  },
+  "basics": {
+    "name": "Luis Sánchez Elvira",
+    "role": "L1/L2 IT support and junior developer",
+    "summary": "Two years of L1/L2 support at Telefónica Tech and the Spanish Ministry of Foreign Affairs. I finish my Computer Engineering degree in 2027 and I am looking for a role in systems or development.",
+    "location": "Madrid, Spain",
+    "availability": "Open to new opportunities",
+    "email": "luis@luisse.pro",
+    "phone": "+34 689 313 908",
+    "links": [
+      {
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/luis-sanchez-elvira"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/DonLuisao"
+      }
+    ],
+    "headline": "Systems, support and code."
+  },
+  "about": [
+    "I have over two years of experience in L1/L2 IT support. At Minsait I resolved 10 to 15 L2 incidents a day for Telefónica Tech, with SLA compliance above 95%. At Ibermática I supported more than 1,000 users at the Spanish Ministry of Foreign Affairs, in a high-security environment.",
+    "I have also worked in web development with ASP.NET, C#, JavaScript and SQL Server, maintaining and extending internal applications in production.",
+    "I like building things that work and understanding why the ones that don't are failing. This site, for example, is hosted by me."
+  ],
+  "experience": [
+    {
+      "company": "NTT DATA",
+      "role": "Intern, anti-money laundering team",
+      "period": "Oct 2026 – present",
+      "current": true,
+      "bullets": []
+    },
+    {
+      "company": "Minsait",
+      "role": "L2 support, Telefónica Tech project",
+      "period": "",
+      "bullets": [
+        "Resolved 10 to 15 L2 incidents a day.",
+        "SLA compliance above 95%."
+      ]
+    },
+    {
+      "company": "Ibermática",
+      "role": "L1/L2 service desk, Spanish Ministry of Foreign Affairs (MAEC)",
+      "period": "",
+      "bullets": [
+        "Supported more than 1,000 users.",
+        "Worked in a high-security environment."
+      ]
+    },
+    {
+      "company": "ASLAM New IT",
+      "role": "Support and development",
+      "period": "",
+      "bullets": []
+    },
+    {
+      "company": "Universidad Francisco de Vitoria",
+      "role": "Web development intern",
+      "period": "",
+      "bullets": [
+        "Maintained and extended internal applications in production.",
+        "ASP.NET, C#, JavaScript and SQL Server."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "title": "BSc in Computer Engineering",
+      "detail": "Universidad Alfonso X el Sabio. Two distinctions with honours.",
+      "period": "in progress, graduating June 2027"
+    },
+    {
+      "title": "Higher vocational diploma in Cross-Platform Application Development (DAM)",
+      "detail": "",
+      "period": "2021 – 2023"
+    },
+    {
+      "title": "Vocational diploma in Microcomputer Systems and Networks (SMR)",
+      "detail": "",
+      "period": "2019 – 2021"
+    },
+    {
+      "title": "Cisco CCNA",
+      "detail": "",
+      "period": "in preparation"
+    }
+  ],
+  "languages": [
+    {
+      "name": "Spanish",
+      "level": "Native"
+    },
+    {
+      "name": "English",
+      "level": "B2"
+    }
+  ],
+  "skills": [
+    {
+      "group": "Languages",
+      "items": [
+        {
+          "name": "JavaScript",
+          "level": "Intermediate"
+        },
+        {
+          "name": "C#",
+          "level": "Intermediate"
+        },
+        {
+          "name": "Java",
+          "level": "Intermediate"
+        },
+        {
+          "name": "Python",
+          "level": "Intermediate"
+        },
+        {
+          "name": "SQL",
+          "level": "Intermediate"
+        }
+      ]
+    },
+    {
+      "group": "Frameworks and databases",
+      "items": [
+        {
+          "name": ".NET / ASP.NET",
+          "level": "Intermediate"
+        },
+        {
+          "name": "Node.js / Express",
+          "level": "Intermediate"
+        },
+        {
+          "name": "SQL Server",
+          "level": "Intermediate"
+        },
+        {
+          "name": "SQLite",
+          "level": "Intermediate"
+        },
+        {
+          "name": "Astro",
+          "level": "Basic"
+        }
+      ]
+    },
+    {
+      "group": "Systems and support",
+      "items": [
+        {
+          "name": "Active Directory",
+          "level": "Advanced"
+        },
+        {
+          "name": "Microsoft 365",
+          "level": "Advanced"
+        },
+        {
+          "name": "Windows 10/11",
+          "level": "Advanced"
+        },
+        {
+          "name": "SCCM",
+          "level": "Intermediate"
+        },
+        {
+          "name": "Linux",
+          "level": "Basic"
+        }
+      ]
+    },
+    {
+      "group": "Tools and networking",
+      "items": [
+        {
+          "name": "Jira",
+          "level": "Advanced"
+        },
+        {
+          "name": "EasyVista",
+          "level": "Advanced"
+        },
+        {
+          "name": "Git / GitHub",
+          "level": "Intermediate"
+        },
+        {
+          "name": "Docker",
+          "level": "Basic"
+        },
+        {
+          "name": "Networking (CCNA)",
+          "level": "In training"
+        }
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Fichario",
+      "featured": true,
+      "url": "https://fichario.luisse.pro",
+      "description": "A flashcard and quiz web app with user accounts and sync across devices. I host it on my own server, and it has a read-only demo you can try without signing up.",
+      "role": "Design, full-stack development and deployment.",
+      "stack": [
+        "JavaScript",
+        "Node.js",
+        "Express",
+        "SQLite",
+        "HTML/CSS",
+        "Docker"
+      ]
+    },
+    {
+      "name": "Python web scraper",
+      "featured": false,
+      "url": "",
+      "description": "A script that automates extracting and processing data from web pages, cutting the time spent collecting it by hand.",
+      "role": "Development and maintenance.",
+      "stack": [
+        "Python",
+        "BeautifulSoup",
+        "Requests",
+        "Git"
+      ]
+    },
+    {
+      "name": "This site",
+      "featured": false,
+      "url": "",
+      "description": "A static site generated from a single data file per language. It runs on a Raspberry Pi 4 with Docker and Caddy, and reaches the internet through a Cloudflare tunnel, with no open ports.",
+      "role": "Design, development and self-hosting.",
+      "stack": [
+        "Astro",
+        "CSS",
+        "Docker",
+        "Caddy",
+        "Cloudflare Tunnel"
+      ]
+    }
+  ],
+  "route": {
+    "title": "How this page reached you",
+    "intro": "A Raspberry Pi at my home serves it. I set it up, I deploy it and I monitor it.",
+    "steps": [
+      {
+        "name": "Your browser",
+        "note": "HTTPS request"
+      },
+      {
+        "name": "Cloudflare",
+        "note": "certificate and cache",
+        "tunnel": true
+      },
+      {
+        "name": "Encrypted tunnel",
+        "note": "no open ports"
+      },
+      {
+        "name": "Raspberry Pi 4",
+        "note": "Madrid, at my home",
+        "pi": true
+      }
+    ]
+  }
+}
