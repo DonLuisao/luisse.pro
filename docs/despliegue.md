@@ -66,17 +66,25 @@ nano ~/.ssh/authorized_keys
 command="/usr/bin/rrsync -wo /home/USUARIO/web/site",restrict ssh-ed25519 AAAA... github-deploy-cv
 ```
 
-Prueba desde el Mac (con `npm run build` hecho):
+Pruébalo desde el Mac, en este orden. Las opciones `IdentitiesOnly` y `BatchMode`
+obligan a usar solo esa clave y nunca piden contraseña, para que la prueba no pueda
+entrar con acceso completo por otra vía.
 
 ```bash
-rsync -rltvz --delete -e "ssh -i ~/.ssh/cv-deploy" dist/ USUARIO@IP_TAILSCALE_PI:
+SSH_DEPLOY="ssh -i ~/.ssh/cv-deploy -o IdentitiesOnly=yes -o BatchMode=yes"
+
+# 1. Tiene que FALLAR: la clave no debe poder ejecutar comandos
+$SSH_DEPLOY USUARIO@IP_PI true && echo "MAL: la clave no está restringida" || echo "Bien: restringida"
+
+# 2. Simulación: muestra qué copiaría, sin tocar nada
+rsync -rltvzn --delete -e "$SSH_DEPLOY" dist/ USUARIO@IP_PI:
+
+# 3. Copia real
+rsync -rltvz --delete -e "$SSH_DEPLOY" dist/ USUARIO@IP_PI:
 ```
 
-Y comprueba que esa clave no abre una sesión (debe fallar):
-
-```bash
-ssh -i ~/.ssh/cv-deploy USUARIO@IP_TAILSCALE_PI
-```
+No sigas al paso 2 si el paso 1 dice "MAL". El workflow hace la misma comprobación
+antes de cada despliegue y se cancela si la clave no está restringida.
 
 ### 3. Tailscale
 

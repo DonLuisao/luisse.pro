@@ -55,7 +55,7 @@ Publicación manual, por si hiciera falta:
 
 ```bash
 npm run build
-rsync -rltvz --delete -e "ssh -i ~/.ssh/cv-deploy" dist/ USUARIO@IP_TAILSCALE_PI:
+rsync -rltvz --delete -e "ssh -i ~/.ssh/cv-deploy -o IdentitiesOnly=yes -o BatchMode=yes" dist/ USUARIO@IP_TAILSCALE_PI:
 ```
 
 ## Datos en vivo de la Raspberry Pi

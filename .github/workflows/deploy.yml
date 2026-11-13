@@ -91,12 +91,26 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           printf '%s\n' "$PI_KNOWN_HOSTS" > ~/.ssh/known_hosts
 
+      - name: Comprobar que la clave está restringida a ~/web/site
+        env:
+          PI_USER: ${{ secrets.PI_USER }}
+          PI_HOST: ${{ secrets.PI_HOST }}
+        # Con rrsync, la clave solo acepta rsync y cualquier otro comando falla.
+        # Si "true" funcionara, la clave tendría acceso completo y el --delete del
+        # siguiente paso actuaría sobre la carpeta personal: se cancela el despliegue.
+        run: |
+          if ssh -o BatchMode=yes "$PI_USER@$PI_HOST" true 2>/dev/null; then
+            echo "::error::La clave de despliegue no está restringida con rrsync. Despliegue cancelado."
+            exit 1
+          fi
+          echo "Clave restringida correctamente."
+
       - name: Copiar la web a la Pi
         env:
           PI_USER: ${{ secrets.PI_USER }}
           PI_HOST: ${{ secrets.PI_HOST }}
         # En la Pi, esta clave solo puede escribir en ~/web/site (rrsync), por eso el destino va vacío
-        run: rsync -rltvz --delete dist/ "$PI_USER@$PI_HOST:"
+        run: rsync -rltvz --delete -e "ssh -o BatchMode=yes" dist/ "$PI_USER@$PI_HOST:"
 
       - name: Comprobar que la web responde
         run: |
