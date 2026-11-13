@@ -1,46 +1,13 @@
 {
-  "meta": {
-    "title": "Luis Sánchez Elvira | Soporte IT y desarrollo",
-    "description": "CV de Luis Sánchez Elvira: soporte IT N1/N2 y desarrollador junior en Madrid. Experiencia, stack, proyectos y contacto.",
-    "pdf": "/Luis-Sanchez-Elvira-CV-ES.pdf"
-  },
-  "ui": {
-    "skip": "Saltar al contenido",
-    "navLabel": "Secciones",
-    "langLabel": "Idioma",
-    "themeToggle": "Cambiar entre tema claro y oscuro",
-    "about": "Sobre mí",
-    "experience": "Experiencia",
-    "education": "Formación",
-    "languages": "Idiomas",
-    "skills": "Stack",
-    "projects": "Proyectos",
-    "contact": "Contacto",
-    "writeMe": "Escribirme",
-    "stackLabel": "Tecnologías",
-    "footer": "Hecha con Astro y servida desde una Raspberry Pi 4 en mi casa, en Madrid.",
-    "live": {
-      "label": "Datos del servidor",
-      "cpu": "CPU",
-      "uptime": "Encendida",
-      "visits": "Visitas, 30 días",
-      "deployed": "Último despliegue",
-      "days": "días"
-    },
-    "downloadPdf": "Descargar CV en PDF",
-    "print": {
-      "note": "Generado desde los mismos datos que luisse.pro, donde también está en inglés.",
-      "updated": "Actualizado"
-    }
-  },
   "basics": {
     "name": "Luis Sánchez Elvira",
+    "headline": "Sistemas, soporte y código.",
     "role": "Soporte IT N1/N2 y desarrollador junior",
     "summary": "Profesional de IT con experiencia en soporte N1/N2 en Telefónica Tech y el Ministerio de Asuntos Exteriores, y en desarrollo web con ASP.NET y JavaScript. Termino Ingeniería Informática en 2027 y busco un puesto junior en soporte, sistemas o desarrollo.",
     "location": "Madrid",
     "availability": "Disponible para nuevas oportunidades",
     "email": "luis@luisse.pro",
-    "phone": "+34 689 313 908",
+    "phone": "",
     "links": [
       {
         "label": "LinkedIn",
@@ -50,8 +17,7 @@
         "label": "GitHub",
         "url": "https://github.com/DonLuisao"
       }
-    ],
-    "headline": "Sistemas, soporte y código."
+    ]
   },
   "about": [
     "He trabajado en soporte N1/N2 en entornos corporativos exigentes. En Minsait resolvía entre 10 y 15 incidencias N2 al día para Telefónica Tech, con un cumplimiento de SLA superior al 95 %, y en Ibermática di soporte a más de 1.000 usuarios del Ministerio de Asuntos Exteriores, en un entorno con altos requisitos de seguridad.",
@@ -288,22 +254,62 @@
     "steps": [
       {
         "name": "Tu navegador",
-        "note": "petición HTTPS"
+        "note": "petición HTTPS",
+        "tunnel": false,
+        "pi": false
       },
       {
         "name": "Cloudflare",
         "note": "certificado y caché",
-        "tunnel": true
+        "tunnel": true,
+        "pi": false
       },
       {
         "name": "Túnel cifrado",
-        "note": "sin puertos abiertos"
+        "note": "sin puertos abiertos",
+        "tunnel": false,
+        "pi": false
       },
       {
         "name": "Raspberry Pi 4",
         "note": "Madrid, en mi casa",
+        "tunnel": false,
         "pi": true
       }
     ]
+  },
+  "meta": {
+    "title": "Luis Sánchez Elvira | Soporte IT y desarrollo",
+    "description": "CV de Luis Sánchez Elvira: soporte IT N1/N2 y desarrollador junior en Madrid. Experiencia, stack, proyectos y contacto.",
+    "pdf": "/Luis-Sanchez-Elvira-CV-ES.pdf"
+  },
+  "ui": {
+    "skip": "Saltar al contenido",
+    "navLabel": "Secciones",
+    "langLabel": "Idioma",
+    "themeToggle": "Cambiar entre tema claro y oscuro",
+    "about": "Sobre mí",
+    "experience": "Experiencia",
+    "education": "Formación",
+    "languages": "Idiomas",
+    "skills": "Stack",
+    "projects": "Proyectos",
+    "contact": "Contacto",
+    "writeMe": "Escribirme",
+    "downloadPdf": "Descargar CV en PDF",
+    "stackLabel": "Tecnologías",
+    "footer": "Hecha con Astro y servida desde una Raspberry Pi 4 en mi casa, en Madrid.",
+    "live": {
+      "label": "Datos del servidor",
+      "cpu": "CPU",
+      "uptime": "Encendida",
+      "visits": "Visitas, 30 días",
+      "deployed": "Último despliegue",
+      "days": "días"
+    },
+    "print": {
+      "note": "Generado desde los mismos datos que luisse.pro, donde también está en inglés.",
+      "updated": "Actualizado"
+    }
   }
 }

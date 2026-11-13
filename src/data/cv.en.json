@@ -1,46 +1,13 @@
 {
-  "meta": {
-    "title": "Luis Sánchez Elvira | IT support and development",
-    "description": "CV of Luis Sánchez Elvira: L1/L2 IT support and junior developer based in Madrid. Experience, stack, projects and contact.",
-    "pdf": "/Luis-Sanchez-Elvira-CV-EN.pdf"
-  },
-  "ui": {
-    "skip": "Skip to content",
-    "navLabel": "Sections",
-    "langLabel": "Language",
-    "themeToggle": "Switch between light and dark theme",
-    "about": "About me",
-    "experience": "Experience",
-    "education": "Education",
-    "languages": "Languages",
-    "skills": "Stack",
-    "projects": "Projects",
-    "contact": "Contact",
-    "writeMe": "Email me",
-    "stackLabel": "Technologies",
-    "footer": "Built with Astro and served from a Raspberry Pi 4 at my home in Madrid.",
-    "live": {
-      "label": "Server data",
-      "cpu": "CPU",
-      "uptime": "Uptime",
-      "visits": "Visits, 30 days",
-      "deployed": "Last deploy",
-      "days": "days"
-    },
-    "downloadPdf": "Download CV (PDF)",
-    "print": {
-      "note": "Generated from the same data as luisse.pro, which is also available in Spanish.",
-      "updated": "Updated"
-    }
-  },
   "basics": {
     "name": "Luis Sánchez Elvira",
+    "headline": "Systems, support and code.",
     "role": "L1/L2 IT support and junior developer",
     "summary": "IT professional with L1/L2 support experience at Telefónica Tech and the Spanish Ministry of Foreign Affairs, and web development experience with ASP.NET and JavaScript. I finish my Computer Engineering degree in 2027 and I am looking for a junior role in support, systems or development.",
     "location": "Madrid, Spain",
     "availability": "Open to new opportunities",
     "email": "luis@luisse.pro",
-    "phone": "+34 689 313 908",
+    "phone": "",
     "links": [
       {
         "label": "LinkedIn",
@@ -50,8 +17,7 @@
         "label": "GitHub",
         "url": "https://github.com/DonLuisao"
       }
-    ],
-    "headline": "Systems, support and code."
+    ]
   },
   "about": [
     "I have worked in L1/L2 support in demanding corporate environments. At Minsait I resolved 10 to 15 L2 incidents a day for Telefónica Tech, with SLA compliance above 95%, and at Ibermática I supported more than 1,000 users at the Spanish Ministry of Foreign Affairs, in an environment with strict security requirements.",
@@ -288,22 +254,62 @@
     "steps": [
       {
         "name": "Your browser",
-        "note": "HTTPS request"
+        "note": "HTTPS request",
+        "tunnel": false,
+        "pi": false
       },
       {
         "name": "Cloudflare",
         "note": "certificate and cache",
-        "tunnel": true
+        "tunnel": true,
+        "pi": false
       },
       {
         "name": "Encrypted tunnel",
-        "note": "no open ports"
+        "note": "no open ports",
+        "tunnel": false,
+        "pi": false
       },
       {
         "name": "Raspberry Pi 4",
         "note": "Madrid, at my home",
+        "tunnel": false,
         "pi": true
       }
     ]
+  },
+  "meta": {
+    "title": "Luis Sánchez Elvira | IT support and development",
+    "description": "CV of Luis Sánchez Elvira: L1/L2 IT support and junior developer based in Madrid. Experience, stack, projects and contact.",
+    "pdf": "/Luis-Sanchez-Elvira-CV-EN.pdf"
+  },
+  "ui": {
+    "skip": "Skip to content",
+    "navLabel": "Sections",
+    "langLabel": "Language",
+    "themeToggle": "Switch between light and dark theme",
+    "about": "About me",
+    "experience": "Experience",
+    "education": "Education",
+    "languages": "Languages",
+    "skills": "Stack",
+    "projects": "Projects",
+    "contact": "Contact",
+    "writeMe": "Email me",
+    "downloadPdf": "Download CV (PDF)",
+    "stackLabel": "Technologies",
+    "footer": "Built with Astro and served from a Raspberry Pi 4 at my home in Madrid.",
+    "live": {
+      "label": "Server data",
+      "cpu": "CPU",
+      "uptime": "Uptime",
+      "visits": "Visits, 30 days",
+      "deployed": "Last deploy",
+      "days": "days"
+    },
+    "print": {
+      "note": "Generated from the same data as luisse.pro, which is also available in Spanish.",
+      "updated": "Updated"
+    }
   }
 }
