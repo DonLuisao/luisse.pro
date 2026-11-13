@@ -42,8 +42,30 @@ Después, en `~/web`:
 docker compose up -d
 ```
 
+Cada vez que cambie el `Caddyfile`, recárgalo:
+`docker compose exec web caddy reload --config /etc/caddy/Caddyfile`.
+
 El Caddyfile añade cabeceras de caché: HTML y PDF se revalidan siempre, para que
 Cloudflare no siga sirviendo una versión antigua después de un despliegue.
+
+### 1b. Servicio de estadísticas
+
+El despliegue automático solo copia la web. El servicio `stats/` se instala a mano y
+solo hay que repetirlo si cambia `stats/server.mjs`. Desde el Mac, en la carpeta del repo:
+
+```bash
+ssh USUARIO@IP_PI 'mkdir -p ~/web/stats ~/web/stats-data && id -u'
+scp stats/server.mjs USUARIO@IP_PI:~/web/stats/
+scp deploy/Caddyfile deploy/docker-compose.yml USUARIO@IP_PI:~/web/
+ssh USUARIO@IP_PI 'cd ~/web && docker compose up -d && docker compose exec web caddy reload --config /etc/caddy/Caddyfile'
+```
+
+El `caddy reload` hace falta porque Caddy no vuelve a leer el `Caddyfile` solo, y
+`docker compose up -d` no reinicia el contenedor `web` si solo ha cambiado ese archivo.
+Sin él, `/api/status` da 404.
+
+Si `id -u` no devuelve `1000`, cambia `user: "1000:1000"` en el `docker-compose.yml`
+de la Pi por ese número. Comprobación: `curl https://luisse.pro/api/status`.
 
 ### 2. Clave de despliegue
 

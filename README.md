@@ -56,16 +56,22 @@ npm run build
 rsync -rltvz --delete -e "ssh -i ~/.ssh/cv-deploy -o IdentitiesOnly=yes -o BatchMode=yes" dist/ USUARIO@IP_TAILSCALE_PI:
 ```
 
-## Datos en vivo de la Raspberry Pi
+## Datos en vivo y visitas
 
-El panel de la ruta pide `/api/status` y espera un JSON así:
+El panel oscuro de la portada muestra la temperatura de la CPU de la Pi, los días que
+lleva encendida y las visitas de los últimos 30 días. Los da `stats/server.mjs`, un
+servicio sin dependencias que corre en la Pi junto a Caddy (ver `deploy/`):
 
-```json
-{ "cpu_temp_c": 41.2, "uptime_s": 1987200, "visits_30d": 128 }
-```
+- `GET /api/status`: `{ "cpu_temp_c": 51.7, "uptime_s": 1987234, "visits_30d": 128 }`
+- `POST /api/hit`: suma una visita a `/` o `/en/`
+- `GET /api/health`: `ok`, para vigilarlo desde Uptime Kuma
 
-Mientras no exista, `liveStats` vale `false` en `src/components/CV.astro`: la página
-no lo pide y solo muestra "Último despliegue", que sale de la fecha del build.
+Por cada visita solo se guarda el día, la página y el idioma, sumados en un contador
+(SQLite en `~/web/stats-data`). Sin cookies ni IPs. Cuenta una visita por página y
+pestaña, respeta Global Privacy Control y acepta como mucho 120 visitas por minuto.
+
+La página solo pide estos datos en `luisse.pro`; en local y en GitHub Actions no.
+Para desactivarlos, `liveStats = false` en `src/components/CV.astro`.
 
 ## Tipografías
 
@@ -84,5 +90,6 @@ src/
 scripts/        check-data.mjs y check-cms.mjs (controles) y pdf.mjs (genera los PDF)
 public/admin/   panel de edición (Sveltia CMS)
 deploy/         Caddyfile y docker-compose.yml del servidor en la Pi
+stats/          servicio de estadísticas que corre en la Pi
 docs/           despliegue.md y panel.md
 ```

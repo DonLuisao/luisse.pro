@@ -2,9 +2,9 @@
 const { cv, lang } = Astro.props;
 const { basics, ui, route } = cv;
 const builtAt = new Date().toISOString();
-// Cambiar a true cuando exista el servicio /api/status en la Pi (paso 5).
-// Mientras sea false, la página no lo pide y no genera errores 404.
-const liveStats = false;
+// Datos en vivo y contador de visitas (servicio stats/ en la Pi).
+// Solo se activan en luisse.pro: en local y en GitHub Actions no hay servicio.
+const liveStats = true;
 ---
 <a class="skip" href="#main">{ui.skip}</a>
 
@@ -199,7 +199,21 @@ const liveStats = false;
         : rtf.format(-Math.round(mins / 1440), 'day');
     }
 
-    // Datos en vivo de la Pi. Si /api/status no existe todavía, no se muestra nada.
+    const enabled = live.dataset.stats === 'on' && location.hostname === 'luisse.pro';
+
+    // Contador de visitas: una por página y pestaña. No usa cookies; sessionStorage
+    // se queda en el navegador y nunca se envía. Se respeta Global Privacy Control.
+    if (enabled && !(navigator as any).globalPrivacyControl) {
+      const key = `visita:${location.pathname}`;
+      try {
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, '1');
+          navigator.sendBeacon('/api/hit', JSON.stringify({ path: location.pathname, lang }));
+        }
+      } catch (e) {}
+    }
+
+    // Datos en vivo de la Pi. Si el servicio no responde, esas filas siguen ocultas.
     const show = (key: string, text: string) => {
       const row = live.querySelector<HTMLElement>(`[data-stat="${key}"]`);
       const dd = row?.querySelector('dd');
@@ -208,14 +222,16 @@ const liveStats = false;
         row.hidden = false;
       }
     };
-    if (live.dataset.stats === 'on') fetch('/api/status')
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((s) => {
-        const nf = new Intl.NumberFormat(lang);
-        if (typeof s.cpu_temp_c === 'number') show('cpu', `${nf.format(Math.round(s.cpu_temp_c))} °C`);
-        if (typeof s.uptime_s === 'number') show('uptime', `${nf.format(Math.floor(s.uptime_s / 86400))} ${live.dataset.days}`);
-        if (typeof s.visits_30d === 'number') show('visits', nf.format(s.visits_30d));
-      })
-      .catch(() => {});
+    if (enabled) {
+      fetch('/api/status')
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((s) => {
+          const nf = new Intl.NumberFormat(lang);
+          if (typeof s.cpu_temp_c === 'number') show('cpu', `${nf.format(Math.round(s.cpu_temp_c))} °C`);
+          if (typeof s.uptime_s === 'number') show('uptime', `${nf.format(Math.floor(s.uptime_s / 86400))} ${live.dataset.days}`);
+          if (typeof s.visits_30d === 'number') show('visits', nf.format(s.visits_30d));
+        })
+        .catch(() => {});
+    }
   }
 </script>

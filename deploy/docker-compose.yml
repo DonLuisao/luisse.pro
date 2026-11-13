@@ -8,6 +8,24 @@ services:
       - ./site:/usr/share/caddy:ro
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
 
+  stats:
+    image: node:24-alpine
+    restart: unless-stopped
+    # Mismo usuario que el dueño de ~/web/stats-data en la Pi (comprobar con: id -u)
+    user: "1000:1000"
+    working_dir: /app
+    command: ["node", "--disable-warning=ExperimentalWarning", "server.mjs"]
+    environment:
+      - DB_PATH=/data/stats.db
+    volumes:
+      - ./stats/server.mjs:/app/server.mjs:ro
+      - ./stats-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/health"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped

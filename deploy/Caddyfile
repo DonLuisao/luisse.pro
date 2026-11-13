@@ -1,19 +1,28 @@
 # Servidor web del CV en la Raspberry Pi. Se monta en el contenedor "web".
 :80 {
-	root * /usr/share/caddy
 	encode zstd gzip
 
-	# CSS y JS de Astro: el nombre cambia con cada versión, se pueden guardar un año
-	@hashed path /_astro/*
-	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	# Estadísticas: las atiende el contenedor "stats" (stats/server.mjs)
+	handle /api/* {
+		reverse_proxy stats:8080
+	}
 
-	# Tipografías: cambian muy poco
-	@fonts path /fonts/*
-	header @fonts Cache-Control "public, max-age=2592000"
+	# La web
+	handle {
+		root * /usr/share/caddy
 
-	# HTML y PDF: siempre se revalidan, para que tras un despliegue nadie vea la versión anterior
-	@rest not path /_astro/* /fonts/*
-	header @rest Cache-Control "public, max-age=0, must-revalidate"
+		# CSS y JS de Astro: el nombre cambia con cada versión, se pueden guardar un año
+		@hashed path /_astro/*
+		header @hashed Cache-Control "public, max-age=31536000, immutable"
 
-	file_server
+		# Tipografías: cambian muy poco
+		@fonts path /fonts/*
+		header @fonts Cache-Control "public, max-age=2592000"
+
+		# HTML y PDF: siempre se revalidan, para que tras un despliegue nadie vea la versión anterior
+		@rest not path /_astro/* /fonts/*
+		header @rest Cache-Control "public, max-age=0, must-revalidate"
+
+		file_server
+	}
 }
