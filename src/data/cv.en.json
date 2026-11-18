@@ -199,7 +199,7 @@
     {
       "name": "Fichario",
       "featured": true,
-      "url": "https://fichario.luisse.pro",
+      "url": "https://repaso.luisse.pro",
       "description": "A flashcard and quiz web app with user accounts and sync across devices. I host it on my own server, and it has a read-only demo you can try without signing up.",
       "role": "Design, full-stack development and deployment.",
       "stack": [

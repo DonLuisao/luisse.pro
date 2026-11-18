@@ -197,9 +197,9 @@
   ],
   "projects": [
     {
-      "name": "Fichario",
+      "name": "Repaso",
       "featured": true,
-      "url": "https://fichario.luisse.pro",
+      "url": "https://repaso.luisse.pro",
       "description": "Aplicación web de tarjetas de estudio y tests, con cuentas de usuario y sincronización entre dispositivos. La alojo en mi propio servidor y tiene una demo de solo lectura que se puede probar sin registrarse.",
       "role": "Diseño, desarrollo full-stack y despliegue.",
       "stack": [
