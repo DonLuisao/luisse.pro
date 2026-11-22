@@ -1,5 +1,6 @@
 // Control de calidad del panel (Sveltia CMS).
-// Comprueba que public/admin/config.yml tiene un campo para cada clave de los JSON del CV
+// Comprueba que public/admin/config.yml tiene un campo para cada clave de los JSON
+// (src/data/cv.*.json y src/data/homelab.*.json)
 // (si faltara, el panel la perdería al guardar) y que todos los campos dicen si se
 // traducen (i18n: true) o son iguales en los dos idiomas (i18n: duplicate). Un campo
 // sin i18n solo se guardaría en español y desaparecería del JSON en inglés.
@@ -8,13 +9,13 @@ import { parse } from 'yaml';
 
 const root = new URL('..', import.meta.url);
 const config = parse(await readFile(new URL('public/admin/config.yml', root), 'utf8'));
-const file = config.collections?.find((c) => c.name === 'cv')?.files?.find((f) => f.name === 'cv');
 const errors = [];
 
-if (!file) {
-  console.error('config.yml: no se encuentra la colección "cv" con el archivo "cv".');
-  process.exit(1);
-}
+// Colección del panel y archivo JSON que edita (cada uno en es y en)
+const FILES = [
+  { collection: 'cv', data: 'cv' },
+  { collection: 'homelab', data: 'homelab' },
+];
 
 const I18N_OK = new Set([true, 'duplicate']);
 
@@ -28,7 +29,6 @@ function checkI18n(fields, path) {
     if (f.field) checkI18n([f.field], inner);
   }
 }
-checkI18n(file.fields, '');
 
 // 2. Cada clave de los JSON tiene su campo en el panel
 const byName = (fields) => new Map((fields ?? []).map((f) => [f.name, f]));
@@ -75,9 +75,19 @@ function coverObject(obj, fields, path) {
   }
 }
 
-for (const lang of ['es', 'en']) {
-  const cv = JSON.parse(await readFile(new URL(`src/data/cv.${lang}.json`, root), 'utf8'));
-  coverObject(cv, file.fields, '');
+for (const { collection, data } of FILES) {
+  const file = config.collections?.find((c) => c.name === collection)?.files?.find((f) => f.name === collection);
+  if (!file) {
+    errors.push(`config.yml: no se encuentra la colección "${collection}" con el archivo "${collection}"`);
+    continue;
+  }
+  const before = errors.length;
+  checkI18n(file.fields, '');
+  for (const lang of ['es', 'en']) {
+    const json = JSON.parse(await readFile(new URL(`src/data/${data}.${lang}.json`, root), 'utf8'));
+    coverObject(json, file.fields, '');
+  }
+  for (let i = before; i < errors.length; i++) errors[i] = `${collection}: ${errors[i]}`;
 }
 
 const unique = [...new Set(errors)];
@@ -86,4 +96,4 @@ if (unique.length) {
   for (const e of unique) console.error(`  - ${e}`);
   process.exit(1);
 }
-console.log('El panel cubre todos los campos del CV.');
+console.log('El panel cubre todos los campos del CV y del homelab.');

@@ -1,8 +1,9 @@
 // Servicio de estadísticas de luisse.pro. Corre en la Raspberry Pi, detrás de Caddy.
 //
-//   GET  /api/status  temperatura de la CPU, tiempo encendida y visitas de los últimos 30 días
-//   POST /api/hit     suma una visita a una página
-//   GET  /api/health  para comprobar que el servicio está vivo
+//   GET  /api/status   temperatura de la CPU, tiempo encendida y visitas de los últimos 30 días
+//   GET  /api/homelab  estado de los servicios, sacado de una página de estado de Uptime Kuma
+//   POST /api/hit      suma una visita a una página
+//   GET  /api/health   para comprobar que el servicio está vivo
 //
 // Privacidad: por cada visita solo se guarda el día, la página y el idioma, sumados en un
 // contador. No hay cookies, ni IPs, ni nada que permita distinguir a una persona de otra.
@@ -20,7 +21,12 @@ const UPTIME_PATH = process.env.UPTIME_PATH ?? '/proc/uptime';
 // pueda inflar el contador a base de peticiones.
 const MAX_HITS_PER_MINUTE = Number(process.env.MAX_HITS_PER_MINUTE ?? 120);
 
-const PAGES = new Set(['/', '/en/']);
+// Uptime Kuma: dirección dentro de la red y nombre (slug) de su página de estado.
+// Sin estas dos variables, /api/homelab responde que no hay estado y la página no lo muestra.
+const KUMA_URL = (process.env.KUMA_URL ?? '').replace(/\/+$/, '');
+const KUMA_SLUG = process.env.KUMA_SLUG ?? '';
+
+const PAGES = new Set(['/', '/en/', '/homelab/', '/en/homelab/']);
 const LANGS = new Set(['es', 'en']);
 
 const db = new DatabaseSync(DB_PATH);
@@ -68,6 +74,55 @@ async function status() {
   return body;
 }
 
+// Estado de los servicios desde Uptime Kuma. Solo se publica el nombre de cada monitor,
+// si funciona y su disponibilidad en 24 horas: nada de direcciones, mensajes de error ni tiempos.
+// Se guarda un minuto, que es lo que tarda Uptime Kuma en volver a comprobar.
+const KUMA_STATUS = { 0: 'down', 1: 'up', 2: 'pending', 3: 'maintenance' };
+let kumaCache = { at: 0, ttl: 0, body: '' };
+
+async function kumaJson(path) {
+  const res = await fetch(`${KUMA_URL}${path}`, { signal: AbortSignal.timeout(4000) });
+  if (!res.ok) throw new Error(`Uptime Kuma respondió ${res.status} en ${path}`);
+  return res.json();
+}
+
+async function homelab() {
+  if (Date.now() - kumaCache.at < kumaCache.ttl) return kumaCache.body;
+  let body;
+  let ttl = 60_000;
+  if (!KUMA_URL || !KUMA_SLUG) {
+    body = JSON.stringify({ configured: false });
+    ttl = 10 * 60_000;
+  } else {
+    try {
+      const slug = encodeURIComponent(KUMA_SLUG);
+      const [page, beats] = await Promise.all([
+        kumaJson(`/api/status-page/${slug}`),
+        kumaJson(`/api/status-page/heartbeat/${slug}`),
+      ]);
+      const monitors = {};
+      for (const group of page.publicGroupList ?? []) {
+        for (const m of group.monitorList ?? []) {
+          const list = beats.heartbeatList?.[m.id] ?? [];
+          const last = list.at(-1);
+          const uptime = beats.uptimeList?.[`${m.id}_24`];
+          monitors[m.name] = {
+            status: KUMA_STATUS[last?.status] ?? 'pending',
+            uptime_24h: typeof uptime === 'number' ? Math.round(uptime * 10000) / 10000 : null,
+          };
+        }
+      }
+      body = JSON.stringify({ configured: true, checked_at: new Date().toISOString(), monitors });
+    } catch (error) {
+      console.error('No se ha podido leer Uptime Kuma:', error.message);
+      body = JSON.stringify({ configured: true, error: true });
+      ttl = 30_000;
+    }
+  }
+  kumaCache = { at: Date.now(), ttl, body };
+  return body;
+}
+
 let windowStart = Date.now();
 let hitsInWindow = 0;
 
@@ -112,6 +167,10 @@ const server = createServer(async (req, res) => {
   try {
     if (pathname === '/api/status' && req.method === 'GET') {
       return send(res, 200, await status());
+    }
+
+    if (pathname === '/api/homelab' && req.method === 'GET') {
+      return send(res, 200, await homelab());
     }
 
     if (pathname === '/api/hit' && req.method === 'POST') {

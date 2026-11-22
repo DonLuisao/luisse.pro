@@ -320,6 +320,16 @@ main,
   margin-top: 0.3rem;
 }
 
+.route-more {
+  color: var(--panel-ink);
+  font-weight: 700;
+  margin-left: 0.35rem;
+}
+
+.route-more:hover {
+  color: var(--cable);
+}
+
 .route-steps {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

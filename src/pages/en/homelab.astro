@@ -1,0 +1,8 @@
+---
+import Base from '../../layouts/Base.astro';
+import Homelab from '../../components/Homelab.astro';
+import data from '../../data/homelab.en.json';
+---
+<Base meta={data.meta} lang="en" paths={{ es: '/homelab/', en: '/en/homelab/' }}>
+  <Homelab data={data} lang="en" />
+</Base>

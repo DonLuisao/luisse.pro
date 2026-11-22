@@ -1,0 +1,330 @@
+---
+// Página del homelab: esquema de la red, equipos y servicios, y su estado en vivo.
+// Los datos salen de src/data/homelab.{es,en}.json, que se editan desde el panel.
+import '../styles/homelab.css';
+
+const { data, lang } = Astro.props;
+const { ui, nodes, links } = data;
+const cvHref = lang === 'es' ? '/' : '/en/';
+const tiers = ['internet', 'network', 'devices', 'clients'];
+const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+const machines = nodes.filter((n) => n.tier === 'devices');
+// Lo que se dibuja en el esquema: los enlaces del panel y, además, el cable del router a cada equipo.
+const network = nodes.find((n) => n.tier === 'network');
+const drawn = [
+  ...(network ? machines.map((m) => ({ from: network.id, to: m.id, kind: 'lan' })) : []),
+  ...links.map(({ from, to, kind }) => ({ from, to, kind })),
+];
+const kinds = ['tunnel', 'remote', 'backup', 'sync', 'lan'];
+---
+<a class="skip" href="#main">{ui.skip}</a>
+
+<header class="bar">
+  <a class="bar-name" href={cvHref}>Luis Sánchez Elvira</a>
+  <nav aria-label={ui.navLabel}>
+    <a href={cvHref}>{ui.cv}</a>
+    <a href={lang === 'es' ? '/homelab/' : '/en/homelab/'} aria-current="page">Homelab</a>
+  </nav>
+  <div class="bar-tools">
+    <div class="lang" role="group" aria-label={ui.langLabel}>
+      <a href="/homelab/" lang="es" hreflang="es" aria-current={lang === 'es' ? 'true' : undefined}>ES</a>
+      <span aria-hidden="true">/</span>
+      <a href="/en/homelab/" lang="en" hreflang="en" aria-current={lang === 'en' ? 'true' : undefined}>EN</a>
+    </div>
+    <button type="button" class="theme" id="theme-toggle" aria-label={ui.themeToggle} title={ui.themeToggle}>
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" />
+        <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main id="main" class="homelab" data-lang={lang}>
+  <section class="lab-hero">
+    <h1>{ui.title}</h1>
+    <div>
+      <p>{ui.intro}</p>
+      <p class="lab-note">{ui.privacy}</p>
+    </div>
+  </section>
+
+  <section class="route lab-map" aria-labelledby="map-title">
+    <div class="lab-map-head">
+      <h2 id="map-title">{ui.topology}</h2>
+      <ul class="legend">
+        {kinds.map((k) => (
+          <li><span class:list={['swatch', `k-${k}`]} aria-hidden="true"></span>{ui.legend[k]}</li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="diagram" data-links={JSON.stringify(drawn)}>
+      <svg class="wires" aria-hidden="true"></svg>
+      {tiers.map((tier) => {
+        const row = nodes.filter((n) => n.tier === tier);
+        return row.length > 0 && (
+          <div class:list={['tier', `tier-${tier}`]}>
+            <p class="tier-label">{ui.tiers[tier]}</p>
+            <ul class="tier-nodes">
+              {row.map((n) => (
+                <li class:list={['node-card', { planned: n.planned }]} data-node={n.id} data-tier={n.tier}>
+                  <p class="node-name">
+                    {n.monitor && <span class="dot" data-monitor={n.monitor}><span class="sr" data-status-text></span></span>}
+                    {n.name}
+                  </p>
+                  {n.planned && <p class="tag">{ui.planned}</p>}
+                  <p class="node-role">{n.role}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+
+    <dl class="live lab-live" aria-label={ui.live.label} data-days={ui.live.days}>
+      <div data-stat="cpu" hidden><dt>{ui.live.cpu}</dt><dd></dd></div>
+      <div data-stat="uptime" hidden><dt>{ui.live.uptime}</dt><dd></dd></div>
+      <div data-stat="checked" hidden><dt>{ui.live.checked}</dt><dd></dd></div>
+    </dl>
+  </section>
+
+  <section class="block" id="machines">
+    <h2>{ui.devices}</h2>
+    <div class="body machines">
+      {machines.map((m) => (
+        <article class:list={['machine', { planned: m.planned }]}>
+          <div class="hop-head">
+            <h3>
+              {m.monitor && <span class="dot" data-monitor={m.monitor}><span class="sr" data-status-text></span></span>}
+              {m.name}
+            </h3>
+            {m.planned && <p class="tag">{ui.planned}</p>}
+          </div>
+          {m.specs && <p class="period">{m.specs}</p>}
+          <p class="hop-role">{m.role}</p>
+          {m.live && (
+            <p class="machine-live" data-pi-live hidden></p>
+          )}
+          {m.services.length > 0 && (
+            <ul class="services">
+              {m.services.map((s) => (
+                <li>
+                  <span class="svc-name">
+                    {s.monitor && <span class="dot" data-monitor={s.monitor}><span class="sr" data-status-text></span></span>}
+                    {s.name}
+                  </span>
+                  <span class="svc-detail">{s.detail}</span>
+                  {s.monitor && <span class="svc-uptime" data-uptime-for={s.monitor} hidden></span>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="block" id="flows">
+    <h2>{ui.flows}</h2>
+    <ol class="body flows">
+      {links.map((l) => (
+        <li>
+          <p class="flow-path">
+            <span class:list={['swatch', `k-${l.kind}`]} aria-hidden="true"></span>
+            {byId[l.from]?.name ?? l.from}<span aria-hidden="true"> → </span><span class="sr">, </span>{byId[l.to]?.name ?? l.to}
+          </p>
+          <p class="flow-label">{l.label}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>{ui.footer} <span class="lab-monitor">{ui.live.note}</span></p>
+</footer>
+
+<script is:inline type="application/json" id="lab-status-text" set:html={JSON.stringify({ ...ui.status, uptime: ui.uptime }).replace(/</g, '\\u003c')}></script>
+
+<script>
+  // Tema claro / oscuro (igual que en el CV)
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const current = root.dataset.theme || (systemDark ? 'dark' : 'light');
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch (e) {}
+  });
+
+  const main = document.querySelector<HTMLElement>('.homelab');
+  const lang = main?.dataset.lang || 'es';
+
+  // ---- Cables del esquema ----
+  // Se dibujan sobre las tarjetas a partir de su posición, y se recalculan al cambiar el tamaño.
+  const diagram = document.querySelector<HTMLElement>('.diagram');
+  const svg = diagram?.querySelector('svg');
+  type Link = { from: string; to: string; kind: string };
+  // Lo que va de Internet a un equipo (o al revés) pasa por el router, y así se dibuja:
+  // entra por arriba del router y sale por abajo.
+  const tierOf = (id: string) => diagram?.querySelector<HTMLElement>(`[data-node="${id}"]`)?.dataset.tier;
+  const router = diagram?.querySelector<HTMLElement>('[data-tier="network"]')?.dataset.node;
+  const drawnLinks: Link[] = (JSON.parse(diagram?.dataset.links || '[]') as Link[]).flatMap((l) => {
+    const ends = [tierOf(l.from), tierOf(l.to)];
+    if (router && ends.includes('internet') && ends.includes('devices')) {
+      return [
+        { ...l, to: router },
+        { ...l, from: router },
+      ];
+    }
+    return [l];
+  });
+  const NS = 'http://www.w3.org/2000/svg';
+
+  function draw() {
+    if (!diagram || !svg) return;
+    svg.replaceChildren();
+    if (getComputedStyle(svg).display === 'none') return;
+    const box = diagram.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+    const rect = (id: string) => diagram.querySelector(`[data-node="${id}"]`)?.getBoundingClientRect();
+
+    // Cuántos cables salen por cada lado de cada tarjeta, para repartirlos y que no se pisen
+    const ports = new Map<string, number>();
+    const totals = new Map<string, number>();
+    const plan = drawnLinks.map((l) => {
+      const a = rect(l.from);
+      const b = rect(l.to);
+      if (!a || !b) return null;
+      const same = Math.abs(a.top - b.top) < 4;
+      const down = a.top < b.top;
+      const sideA = same ? 'bottom' : down ? 'bottom' : 'top';
+      const sideB = same ? 'bottom' : down ? 'top' : 'bottom';
+      for (const k of [`${l.from}:${sideA}`, `${l.to}:${sideB}`]) totals.set(k, (totals.get(k) ?? 0) + 1);
+      return { l, a, b, same, sideA, sideB };
+    });
+
+    const portX = (id: string, side: string, r: DOMRect, otherX: number) => {
+      const key = `${id}:${side}`;
+      const n = totals.get(key) ?? 1;
+      const i = ports.get(key) ?? 0;
+      ports.set(key, i + 1);
+      const spread = Math.min(r.width * 0.6, 26 * (n - 1));
+      const start = r.left + r.width / 2 - spread / 2;
+      const x = n === 1 ? r.left + r.width / 2 : start + (spread / (n - 1)) * i;
+      // Pequeño empujón hacia el otro extremo, para que los cables se abran en abanico
+      return x - box.left + Math.max(-6, Math.min(6, (otherX - x) / 40));
+    };
+
+    // Primero los cables de red, que quedan debajo; luego el resto
+    const order = plan.filter(Boolean).sort((p, q) => (p!.l.kind === 'lan' ? -1 : 0) - (q!.l.kind === 'lan' ? -1 : 0));
+    for (const p of order) {
+      const { l, a, b, same, sideA, sideB } = p!;
+      const ax = portX(l.from, sideA, a, b.left + b.width / 2);
+      const bx = portX(l.to, sideB, b, a.left + a.width / 2);
+      const ay = (sideA === 'bottom' ? a.bottom : a.top) - box.top;
+      const by = (sideB === 'bottom' ? b.bottom : b.top) - box.top;
+      let d: string;
+      if (same) {
+        const dip = 34;
+        d = `M${ax},${ay} C${ax},${ay + dip} ${bx},${by + dip} ${bx},${by}`;
+      } else {
+        const mid = (ay + by) / 2;
+        d = `M${ax},${ay} C${ax},${mid} ${bx},${mid} ${bx},${by}`;
+      }
+      const g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', `wire k-${l.kind}`);
+      for (const part of l.kind === 'tunnel' ? ['outer', 'inner'] : ['line']) {
+        const path = document.createElementNS(NS, 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('class', part);
+        g.append(path);
+      }
+      svg.append(g);
+    }
+  }
+
+  if (diagram) {
+    new ResizeObserver(() => draw()).observe(diagram);
+    document.fonts?.ready.then(draw);
+  }
+
+  // ---- Visitas y estado en vivo (solo en luisse.pro) ----
+  const enabled = location.hostname === 'luisse.pro';
+
+  if (enabled && !(navigator as any).globalPrivacyControl) {
+    const key = `visita:${location.pathname}`;
+    try {
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, '1');
+        navigator.sendBeacon('/api/hit', JSON.stringify({ path: location.pathname, lang }));
+      }
+    } catch (e) {}
+  }
+
+  const live = document.querySelector<HTMLElement>('.lab-live');
+  const show = (key: string, text: string) => {
+    const row = live?.querySelector<HTMLElement>(`[data-stat="${key}"]`);
+    const dd = row?.querySelector('dd');
+    if (row && dd) {
+      dd.textContent = text;
+      row.hidden = false;
+    }
+  };
+  const nf = new Intl.NumberFormat(lang);
+  const pct = new Intl.NumberFormat(lang, { style: 'percent', maximumFractionDigits: 2 });
+  const texts = JSON.parse(document.getElementById('lab-status-text')?.textContent || '{}');
+
+  if (enabled) {
+    fetch('/api/status')
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((s) => {
+        const parts: string[] = [];
+        if (typeof s.cpu_temp_c === 'number') {
+          show('cpu', `${nf.format(Math.round(s.cpu_temp_c))} °C`);
+          parts.push(`${nf.format(Math.round(s.cpu_temp_c))} °C`);
+        }
+        if (typeof s.uptime_s === 'number') {
+          const days = `${nf.format(Math.floor(s.uptime_s / 86400))} ${live?.dataset.days ?? ''}`;
+          show('uptime', days);
+          parts.push(days);
+        }
+        const piLive = document.querySelector<HTMLElement>('[data-pi-live]');
+        if (piLive && parts.length) {
+          piLive.textContent = parts.join(', ');
+          piLive.hidden = false;
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/homelab')
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((h) => {
+        if (!h.configured || h.error || !h.monitors) return;
+        for (const dot of document.querySelectorAll<HTMLElement>('[data-monitor]')) {
+          const m = h.monitors[dot.dataset.monitor!];
+          if (!m) continue;
+          dot.dataset.status = m.status;
+          const label = dot.querySelector('[data-status-text]');
+          if (label) label.textContent = `${texts[m.status] ?? m.status}: `;
+          dot.title = texts[m.status] ?? m.status;
+        }
+        for (const el of document.querySelectorAll<HTMLElement>('[data-uptime-for]')) {
+          const m = h.monitors[el.dataset.uptimeFor!];
+          if (m && typeof m.uptime_24h === 'number') {
+            el.textContent = `${pct.format(m.uptime_24h)} ${texts.uptime}`;
+            el.hidden = false;
+          }
+        }
+        if (h.checked_at) {
+          const t = new Date(h.checked_at);
+          show('checked', t.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' }));
+        }
+      })
+      .catch(() => {});
+  }
+</script>

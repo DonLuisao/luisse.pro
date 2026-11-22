@@ -204,3 +204,133 @@ collections:
                 fields:
                   - { label: Nota del pie, name: note, widget: string, i18n: true }
                   - { label: Palabra «Actualizado», name: updated, widget: string, i18n: true }
+
+  - name: homelab
+    label: Homelab
+    i18n: true
+    files:
+      - name: homelab
+        label: Página del homelab
+        file: "src/data/homelab.{{locale}}.json"
+        format: json
+        i18n: true
+        fields:
+          - label: Título y descripción para buscadores
+            name: meta
+            widget: object
+            i18n: true
+            fields:
+              - { label: Título, name: title, widget: string, i18n: true }
+              - { label: Descripción, name: description, widget: text, i18n: true }
+          - label: Textos de la página
+            name: ui
+            widget: object
+            i18n: true
+            collapsed: true
+            fields:
+              - { label: Enlace para saltar al contenido, name: skip, widget: string, i18n: true }
+              - { label: Nombre del menú, name: navLabel, widget: string, i18n: true }
+              - { label: Nombre del selector de idioma, name: langLabel, widget: string, i18n: true }
+              - { label: Botón de tema, name: themeToggle, widget: string, i18n: true }
+              - { label: Enlace al CV, name: cv, widget: string, i18n: true }
+              - { label: Título, name: title, widget: string, i18n: true }
+              - { label: Introducción, name: intro, widget: text, i18n: true }
+              - { label: Nota de privacidad, name: privacy, widget: text, i18n: true }
+              - { label: Título del esquema, name: topology, widget: string, i18n: true }
+              - label: Nombres de las filas del esquema
+                name: tiers
+                widget: object
+                i18n: true
+                fields:
+                  - { label: Internet, name: internet, widget: string, i18n: true }
+                  - { label: Red, name: network, widget: string, i18n: true }
+                  - { label: Equipos, name: devices, widget: string, i18n: true }
+                  - { label: Clientes, name: clients, widget: string, i18n: true }
+              - label: Leyenda de los cables
+                name: legend
+                widget: object
+                i18n: true
+                fields:
+                  - { label: Túnel, name: tunnel, widget: string, i18n: true }
+                  - { label: Acceso remoto, name: remote, widget: string, i18n: true }
+                  - { label: Copias, name: backup, widget: string, i18n: true }
+                  - { label: Sincronización, name: sync, widget: string, i18n: true }
+                  - { label: Red local, name: lan, widget: string, i18n: true }
+              - { label: Título de equipos y servicios, name: devices, widget: string, i18n: true }
+              - { label: Título de los flujos de datos, name: flows, widget: string, i18n: true }
+              - { label: Etiqueta "en montaje", name: planned, widget: string, i18n: true }
+              - label: Textos del estado
+                name: status
+                widget: object
+                i18n: true
+                fields:
+                  - { label: Funciona, name: up, widget: string, i18n: true }
+                  - { label: Caído, name: down, widget: string, i18n: true }
+                  - { label: Comprobando, name: pending, widget: string, i18n: true }
+                  - { label: En mantenimiento, name: maintenance, widget: string, i18n: true }
+              - { label: Texto tras el porcentaje de disponibilidad, name: uptime, widget: string, i18n: true }
+              - label: Datos en vivo
+                name: live
+                widget: object
+                i18n: true
+                fields:
+                  - { label: Nombre del bloque, name: label, widget: string, i18n: true }
+                  - { label: CPU, name: cpu, widget: string, i18n: true }
+                  - { label: Tiempo encendida, name: uptime, widget: string, i18n: true }
+                  - { label: Última comprobación, name: checked, widget: string, i18n: true }
+                  - { label: Palabra "días", name: days, widget: string, i18n: true }
+                  - { label: Nota sobre Uptime Kuma, name: note, widget: text, i18n: true }
+              - { label: Pie de página, name: footer, widget: string, i18n: true }
+          - label: Equipos y servicios
+            name: nodes
+            widget: list
+            i18n: duplicate
+            summary: "{{fields.name}}"
+            hint: "Cada elemento es una tarjeta del esquema. El identificador es el que se usa en los cables."
+            fields:
+              - { label: Identificador, name: id, widget: string, i18n: duplicate, hint: "Corto, sin espacios: pi, synology, qnap..." }
+              - label: Fila del esquema
+                name: tier
+                widget: select
+                i18n: duplicate
+                options:
+                  - { label: Internet, value: internet }
+                  - { label: Red, value: network }
+                  - { label: Equipos, value: devices }
+                  - { label: Clientes, value: clients }
+              - { label: Nombre, name: name, widget: string, i18n: true }
+              - { label: Características, name: specs, widget: string, i18n: true, required: false }
+              - { label: Para qué sirve, name: role, widget: text, i18n: true }
+              - { label: En montaje, name: planned, widget: boolean, i18n: duplicate, required: false }
+              - { label: Mostrar temperatura y tiempo encendida (solo la Pi), name: live, widget: boolean, i18n: duplicate, required: false }
+              - { label: Monitor de Uptime Kuma, name: monitor, widget: string, i18n: duplicate, required: false, hint: "Nombre exacto del monitor en la página de estado. Vacío si no tiene." }
+              - label: Servicios
+                name: services
+                widget: list
+                i18n: duplicate
+                required: false
+                summary: "{{fields.name}}"
+                fields:
+                  - { label: Nombre, name: name, widget: string, i18n: true }
+                  - { label: Qué hace, name: detail, widget: text, i18n: true }
+                  - { label: Monitor de Uptime Kuma, name: monitor, widget: string, i18n: duplicate, required: false, hint: "Nombre exacto del monitor. Vacío si no tiene." }
+          - label: Cables y flujos de datos
+            name: links
+            widget: list
+            i18n: duplicate
+            summary: "{{fields.from}} → {{fields.to}}"
+            hint: "El cable del router a cada equipo se dibuja solo; aquí van los demás."
+            fields:
+              - { label: Desde (identificador), name: from, widget: string, i18n: duplicate }
+              - { label: Hasta (identificador), name: to, widget: string, i18n: duplicate }
+              - label: Tipo
+                name: kind
+                widget: select
+                i18n: duplicate
+                options:
+                  - { label: Túnel de Cloudflare, value: tunnel }
+                  - { label: Acceso remoto, value: remote }
+                  - { label: Copias, value: backup }
+                  - { label: Sincronización, value: sync }
+                  - { label: Red local, value: lan }
+              - { label: Qué pasa por este cable, name: label, widget: text, i18n: true }

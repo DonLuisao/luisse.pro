@@ -15,6 +15,7 @@ const liveStats = true;
     <a href="#skills">{ui.skills}</a>
     <a href="#projects">{ui.projects}</a>
     <a href="#contact">{ui.contact}</a>
+    <a href={lang === 'es' ? '/homelab/' : '/en/homelab/'}>Homelab</a>
   </nav>
   <div class="bar-tools">
     <div class="lang" role="group" aria-label={ui.langLabel}>
@@ -46,7 +47,10 @@ const liveStats = true;
 
   <section class="route" aria-labelledby="route-title">
     <h2 id="route-title">{route.title}</h2>
-    <p class="route-intro">{route.intro}</p>
+    <p class="route-intro">
+      {route.intro}
+      <a class="route-more" href={lang === 'es' ? '/homelab/' : '/en/homelab/'}>{lang === 'es' ? 'Ver el resto del homelab' : 'See the rest of my homelab'}</a>
+    </p>
     <ol class="route-steps">
       {route.steps.map((s) => (
         <li class:list={['step', { tunnel: s.tunnel, pi: s.pi }]}>

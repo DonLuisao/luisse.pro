@@ -17,6 +17,9 @@ services:
     command: ["node", "--disable-warning=ExperimentalWarning", "server.mjs"]
     environment:
       - DB_PATH=/data/stats.db
+      # Página de estado de Uptime Kuma para luisse.pro/homelab (van en ~/web/.env)
+      - KUMA_URL=${KUMA_URL:-}
+      - KUMA_SLUG=${KUMA_SLUG:-}
     volumes:
       - ./stats/server.mjs:/app/server.mjs:ro
       - ./stats-data:/data
@@ -32,3 +35,9 @@ services:
     command: tunnel run
     environment:
       - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    # También en la red "tunel", para llegar a Repaso (~/repaso)
+    networks: [default, tunel]
+
+networks:
+  tunel:
+    external: true

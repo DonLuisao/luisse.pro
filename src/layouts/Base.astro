@@ -1,10 +1,12 @@
 ---
 import '../styles/global.css';
 
-const { cv, lang } = Astro.props;
+// meta: título y descripción de la página (por defecto, los del CV).
+// paths: dónde está la misma página en cada idioma (por defecto, la portada del CV).
+const { cv, lang, meta = cv?.meta, paths = { es: '/', en: '/en/' } } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const esUrl = new URL('/', Astro.site);
-const enUrl = new URL('/en/', Astro.site);
+const esUrl = new URL(paths.es, Astro.site);
+const enUrl = new URL(paths.en, Astro.site);
 ---
 <!doctype html>
 <html lang={lang}>
@@ -12,16 +14,16 @@ const enUrl = new URL('/en/', Astro.site);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <title>{cv.meta.title}</title>
-    <meta name="description" content={cv.meta.description} />
+    <title>{meta.title}</title>
+    <meta name="description" content={meta.description} />
     <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang="es" href={esUrl} />
     <link rel="alternate" hreflang="en" href={enUrl} />
     <link rel="alternate" hreflang="x-default" href={esUrl} />
     <link rel="icon" type="image/svg+xml" href="/icono.svg" />
     <meta property="og:type" content="profile" />
-    <meta property="og:title" content={cv.meta.title} />
-    <meta property="og:description" content={cv.meta.description} />
+    <meta property="og:title" content={meta.title} />
+    <meta property="og:description" content={meta.description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_GB'} />
     <!-- Aplica el tema guardado antes de pintar, para que no haya parpadeo -->

@@ -147,3 +147,23 @@ lanza el workflow desde **Actions → Comprobar y desplegar → Run workflow**.
   `tag:ci` no está en `tagOwners` o el cliente OAuth no la tiene asignada.
 - **Falla "Copiar la web a la Pi"** con "Host key verification failed": `PI_KNOWN_HOSTS`
   no corresponde a `PI_HOST`.
+
+## Estado del homelab (luisse.pro/homelab)
+
+La página del homelab enseña si cada servicio funciona. El dato sale de una página de estado
+de Uptime Kuma, que el servicio `stats` lee dentro de la red cada minuto. Solo publica el
+nombre de cada monitor, si funciona y su disponibilidad en 24 horas.
+
+1. En Uptime Kuma, crea una *Status Page* (por ejemplo, con el slug `homelab`) y añade los
+   monitores que quieras enseñar.
+2. En la Pi, añade a `~/web/.env` la dirección de Uptime Kuma dentro de la red y el slug:
+
+   ```sh
+   KUMA_URL=http://IP_DEL_EQUIPO:3001
+   KUMA_SLUG=homelab
+   ```
+
+3. Copia el `stats/server.mjs` nuevo y reinicia el servicio (ver el apartado anterior).
+4. En el panel, en *Homelab*, escribe en cada equipo o servicio el nombre exacto de su monitor.
+
+Sin esas variables, la página se ve igual pero sin los puntos de estado.

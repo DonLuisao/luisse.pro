@@ -1,0 +1,257 @@
+{
+  "meta": {
+    "title": "Homelab | Luis Sánchez Elvira",
+    "description": "Luis Sánchez Elvira's homelab: the machines, what runs on each one, how they connect and whether it is all working right now."
+  },
+  "ui": {
+    "skip": "Skip to content",
+    "navLabel": "Sections",
+    "langLabel": "Language",
+    "themeToggle": "Switch between light and dark theme",
+    "cv": "CV",
+    "title": "My homelab",
+    "intro": "The machines I keep at home to host my projects, store backups and learn systems administration. I set them up, configure them and monitor them myself.",
+    "privacy": "I don't publish addresses, ports or versions: only what each machine does.",
+    "topology": "How it is connected",
+    "tiers": {
+      "internet": "Internet",
+      "network": "Network",
+      "devices": "Machines",
+      "clients": "Clients"
+    },
+    "legend": {
+      "tunnel": "Cloudflare tunnel",
+      "remote": "Remote access",
+      "backup": "Backups",
+      "sync": "Sync",
+      "lan": "Local network"
+    },
+    "devices": "Machines and services",
+    "flows": "How data moves",
+    "planned": "Being set up",
+    "status": {
+      "up": "Up",
+      "down": "Down",
+      "pending": "Checking",
+      "maintenance": "Maintenance"
+    },
+    "uptime": "available over 24 h",
+    "live": {
+      "label": "Status now",
+      "cpu": "Pi CPU",
+      "uptime": "Pi uptime",
+      "checked": "Checked",
+      "days": "days",
+      "note": "Service status is checked every minute by Uptime Kuma from inside the network."
+    },
+    "footer": "This page is served by the Raspberry Pi too."
+  },
+  "nodes": [
+    {
+      "id": "cloudflare",
+      "tier": "internet",
+      "name": "Cloudflare",
+      "specs": "",
+      "role": "DNS, certificates and the tunnel: the only way in from the Internet.",
+      "planned": false,
+      "live": false,
+      "monitor": "",
+      "services": []
+    },
+    {
+      "id": "tailscale",
+      "tier": "internet",
+      "name": "Tailscale",
+      "specs": "",
+      "role": "Private network to manage the machines remotely and deploy from GitHub Actions.",
+      "planned": false,
+      "live": false,
+      "monitor": "",
+      "services": []
+    },
+    {
+      "id": "gdrive",
+      "tier": "internet",
+      "name": "Google Drive",
+      "specs": "",
+      "role": "Off-site backup, encrypted before it leaves home.",
+      "planned": false,
+      "live": false,
+      "monitor": "",
+      "services": []
+    },
+    {
+      "id": "router",
+      "tier": "network",
+      "name": "Lab router",
+      "specs": "",
+      "role": "Creates a subnet separate from the home network.",
+      "planned": false,
+      "live": false,
+      "monitor": "",
+      "services": []
+    },
+    {
+      "id": "pi",
+      "tier": "devices",
+      "name": "Raspberry Pi 4",
+      "specs": "8 GB RAM, boots from SSD",
+      "role": "Lightweight services that need to be always on.",
+      "planned": false,
+      "live": true,
+      "monitor": "",
+      "services": [
+        {
+          "name": "luisse.pro",
+          "detail": "This CV and its cookie-free visit counter.",
+          "monitor": ""
+        },
+        {
+          "name": "Repaso",
+          "detail": "Flashcard app with accounts, invitations and offline mode.",
+          "monitor": ""
+        },
+        {
+          "name": "Cloudflare Tunnel",
+          "detail": "Connects to Cloudflare from the inside, so no ports are open.",
+          "monitor": ""
+        },
+        {
+          "name": "Beszel",
+          "detail": "CPU, memory and disk metrics for the machines.",
+          "monitor": ""
+        },
+        {
+          "name": "rclone",
+          "detail": "Uploads the QNAP backup to Google Drive, encrypted.",
+          "monitor": ""
+        }
+      ]
+    },
+    {
+      "id": "synology",
+      "tier": "devices",
+      "name": "Synology DS923+",
+      "specs": "",
+      "role": "Main storage.",
+      "planned": false,
+      "live": false,
+      "monitor": "",
+      "services": [
+        {
+          "name": "Synology Drive",
+          "detail": "Syncs the files on all my laptops.",
+          "monitor": ""
+        },
+        {
+          "name": "Synology Photos",
+          "detail": "The family photos.",
+          "monitor": ""
+        },
+        {
+          "name": "Campus bot",
+          "detail": "Container running a bot for the university's online campus.",
+          "monitor": ""
+        },
+        {
+          "name": "Hyper Backup",
+          "detail": "Daily backup to the QNAP.",
+          "monitor": ""
+        }
+      ]
+    },
+    {
+      "id": "qnap",
+      "tier": "devices",
+      "name": "QNAP TS-233",
+      "specs": "",
+      "role": "Backup target and monitoring for everything else.",
+      "planned": false,
+      "live": false,
+      "monitor": "",
+      "services": [
+        {
+          "name": "Time Machine",
+          "detail": "Backs up the Mac.",
+          "monitor": ""
+        },
+        {
+          "name": "Synology backups",
+          "detail": "Receives the daily Hyper Backup copy.",
+          "monitor": ""
+        },
+        {
+          "name": "Uptime Kuma",
+          "detail": "Checks every minute that everything responds.",
+          "monitor": ""
+        }
+      ]
+    },
+    {
+      "id": "m920q",
+      "tier": "devices",
+      "name": "Lenovo ThinkCentre M920q",
+      "specs": "i7-8700T, 32 GB RAM, 512 GB SSD",
+      "role": "Lab for virtual machines.",
+      "planned": true,
+      "live": false,
+      "monitor": "",
+      "services": [
+        {
+          "name": "Proxmox VE",
+          "detail": "Virtual machines and containers to try out systems, networking and automation.",
+          "monitor": ""
+        }
+      ]
+    },
+    {
+      "id": "clients",
+      "tier": "clients",
+      "name": "Mac and laptops",
+      "specs": "",
+      "role": "Everyday computers.",
+      "planned": false,
+      "live": false,
+      "monitor": "",
+      "services": []
+    }
+  ],
+  "links": [
+    {
+      "from": "cloudflare",
+      "to": "pi",
+      "kind": "tunnel",
+      "label": "Visits to luisse.pro and Repaso arrive through an encrypted tunnel opened by the Pi."
+    },
+    {
+      "from": "tailscale",
+      "to": "pi",
+      "kind": "remote",
+      "label": "Remote administration and automatic deployments from GitHub."
+    },
+    {
+      "from": "clients",
+      "to": "synology",
+      "kind": "sync",
+      "label": "Synology Drive keeps the laptops in sync."
+    },
+    {
+      "from": "clients",
+      "to": "qnap",
+      "kind": "backup",
+      "label": "The Mac backs itself up with Time Machine."
+    },
+    {
+      "from": "synology",
+      "to": "qnap",
+      "kind": "backup",
+      "label": "Hyper Backup copies the Synology every day."
+    },
+    {
+      "from": "qnap",
+      "to": "gdrive",
+      "kind": "backup",
+      "label": "The Pi uploads that copy to Google Drive with rclone, encrypted."
+    }
+  ]
+}
