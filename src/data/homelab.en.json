@@ -99,17 +99,17 @@
       "role": "Lightweight services that need to be always on.",
       "planned": false,
       "live": true,
-      "monitor": "",
+      "monitor": "Raspberry Pi",
       "services": [
         {
           "name": "luisse.pro",
           "detail": "This CV and its cookie-free visit counter.",
-          "monitor": ""
+          "monitor": "Portfolio"
         },
         {
           "name": "Repaso",
           "detail": "Flashcard app with accounts, invitations and offline mode.",
-          "monitor": ""
+          "monitor": "Repaso"
         },
         {
           "name": "Cloudflare Tunnel",
@@ -119,7 +119,7 @@
         {
           "name": "Beszel",
           "detail": "CPU, memory and disk metrics for the machines.",
-          "monitor": ""
+          "monitor": "Beszel"
         },
         {
           "name": "rclone",
@@ -136,7 +136,7 @@
       "role": "Main storage.",
       "planned": false,
       "live": false,
-      "monitor": "",
+      "monitor": "Synology",
       "services": [
         {
           "name": "Synology Drive",

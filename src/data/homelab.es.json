@@ -99,17 +99,17 @@
       "role": "Servicios ligeros que tienen que estar siempre encendidos.",
       "planned": false,
       "live": true,
-      "monitor": "",
+      "monitor": "Raspberry Pi",
       "services": [
         {
           "name": "luisse.pro",
           "detail": "Este CV y su contador de visitas sin cookies.",
-          "monitor": ""
+          "monitor": "Portfolio"
         },
         {
           "name": "Repaso",
           "detail": "App de tarjetas de estudio con cuentas, invitaciones y modo sin conexión.",
-          "monitor": ""
+          "monitor": "Repaso"
         },
         {
           "name": "Cloudflare Tunnel",
@@ -119,7 +119,7 @@
         {
           "name": "Beszel",
           "detail": "Métricas de CPU, memoria y disco de los equipos.",
-          "monitor": ""
+          "monitor": "Beszel"
         },
         {
           "name": "rclone",
@@ -136,7 +136,7 @@
       "role": "Almacenamiento principal.",
       "planned": false,
       "live": false,
-      "monitor": "",
+      "monitor": "Synology",
       "services": [
         {
           "name": "Synology Drive",
