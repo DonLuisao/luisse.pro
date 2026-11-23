@@ -257,11 +257,20 @@ const kinds = ['tunnel', 'remote', 'backup', 'sync', 'lan'];
   const enabled = location.hostname === 'luisse.pro';
 
   if (enabled && !(navigator as any).globalPrivacyControl) {
+    // Dominio desde el que se llega (solo el dominio) y si es móvil u ordenador
+    const ref = (() => {
+      try {
+        return document.referrer ? new URL(document.referrer).hostname : '';
+      } catch (e) {
+        return '';
+      }
+    })();
+    const device = ((navigator as any).userAgentData?.mobile ?? /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) ? 'mobile' : 'desktop';
     const key = `visita:${location.pathname}`;
     try {
       if (!sessionStorage.getItem(key)) {
         sessionStorage.setItem(key, '1');
-        navigator.sendBeacon('/api/hit', JSON.stringify({ path: location.pathname, lang }));
+        navigator.sendBeacon('/api/hit', JSON.stringify({ path: location.pathname, lang, ref, device }));
       }
     } catch (e) {}
   }

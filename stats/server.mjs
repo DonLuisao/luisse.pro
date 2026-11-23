@@ -2,14 +2,19 @@
 //
 //   GET  /api/status   temperatura de la CPU, tiempo encendida y visitas de los últimos 30 días
 //   GET  /api/homelab  estado de los servicios, sacado de una página de estado de Uptime Kuma
-//   POST /api/hit      suma una visita a una página
-//   GET  /api/health   para comprobar que el servicio está vivo
+//   POST /api/hit            suma una visita a una página
+//   POST /api/download       suma una descarga del CV en PDF
+//   GET  /api/estadisticas   datos del panel privado (solo con Cloudflare Access, ver abajo)
+//   GET  /api/health         para comprobar que el servicio está vivo
 //
-// Privacidad: por cada visita solo se guarda el día, la página y el idioma, sumados en un
-// contador. No hay cookies, ni IPs, ni nada que permita distinguir a una persona de otra.
+// Privacidad: por cada visita solo se guardan, sumados en contadores por día, la página, el
+// idioma, el país (lo pone Cloudflare), el dominio desde el que se llega (linkedin.com, sin
+// la dirección completa) y si es móvil u ordenador. No hay cookies, ni IPs, ni nada que
+// permita distinguir a una persona de otra.
 //
 // Sin dependencias: usa el SQLite que trae Node.
 import { createServer } from 'node:http';
+import { createPublicKey, verify } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { DatabaseSync } from 'node:sqlite';
 
@@ -26,8 +31,17 @@ const MAX_HITS_PER_MINUTE = Number(process.env.MAX_HITS_PER_MINUTE ?? 120);
 const KUMA_URL = (process.env.KUMA_URL ?? '').replace(/\/+$/, '');
 const KUMA_SLUG = process.env.KUMA_SLUG ?? '';
 
+// Panel privado: Cloudflare Access protege /api/estadisticas y firma cada petición con un
+// token (cabecera Cf-Access-Jwt-Assertion) que aquí se comprueba con las claves públicas del
+// equipo de Cloudflare Zero Trust. Sin ACCESS_TEAM y ACCESS_AUD, el panel está desactivado.
+const ACCESS_TEAM = process.env.ACCESS_TEAM ?? ''; // p. ej. "luisse" de luisse.cloudflareaccess.com
+const ACCESS_AUD = process.env.ACCESS_AUD ?? ''; // "Application Audience (AUD) Tag" de la aplicación
+const ACCESS_CERTS_URL = process.env.ACCESS_CERTS_URL ?? `https://${ACCESS_TEAM}.cloudflareaccess.com/cdn-cgi/access/certs`;
+const ACCESS_ISSUER = process.env.ACCESS_ISSUER ?? `https://${ACCESS_TEAM}.cloudflareaccess.com`;
+
 const PAGES = new Set(['/', '/en/', '/homelab/', '/en/homelab/']);
 const LANGS = new Set(['es', 'en']);
+const DEVICES = new Set(['mobile', 'desktop']);
 
 const db = new DatabaseSync(DB_PATH);
 db.exec(`
@@ -44,6 +58,49 @@ const addVisit = db.prepare(`
   ON CONFLICT (day, path, lang) DO UPDATE SET count = count + 1
 `);
 const visitsSince = db.prepare('SELECT COALESCE(SUM(count), 0) AS total FROM visits WHERE day >= ?');
+
+// Desglose para el panel privado. La tabla visits sigue siendo la del contador público;
+// esta guarda además país, origen y dispositivo (empezó a llenarse más tarde que visits).
+db.exec(`
+  CREATE TABLE IF NOT EXISTS details (
+    day     TEXT    NOT NULL,
+    path    TEXT    NOT NULL,
+    country TEXT    NOT NULL,
+    source  TEXT    NOT NULL,
+    device  TEXT    NOT NULL,
+    count   INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, path, country, source, device)
+  ) WITHOUT ROWID;
+  CREATE TABLE IF NOT EXISTS downloads (
+    day   TEXT    NOT NULL,
+    lang  TEXT    NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, lang)
+  ) WITHOUT ROWID;
+`);
+const addDetail = db.prepare(`
+  INSERT INTO details (day, path, country, source, device, count) VALUES (?, ?, ?, ?, ?, 1)
+  ON CONFLICT (day, path, country, source, device) DO UPDATE SET count = count + 1
+`);
+const addDownload = db.prepare(`
+  INSERT INTO downloads (day, lang, count) VALUES (?, ?, 1)
+  ON CONFLICT (day, lang) DO UPDATE SET count = count + 1
+`);
+
+// País: Cloudflare lo manda en CF-IPCountry (dos letras; XX si no lo sabe, T1 si es Tor).
+function countryOf(req) {
+  const c = String(req.headers['cf-ipcountry'] ?? '').toUpperCase();
+  return /^[A-Z]{2}$/.test(c) && c !== 'XX' && c !== 'T1' ? c : '';
+}
+
+// Origen: solo el dominio, sin www. Vacío si se entra directamente o desde la propia web.
+function sourceOf(ref) {
+  if (typeof ref !== 'string' || !ref) return '';
+  const host = ref.toLowerCase().replace(/^www\./, '');
+  if (!/^[a-z0-9.-]{1,100}$/.test(host) || !host.includes('.')) return '';
+  if (host === 'luisse.pro' || host.endsWith('.luisse.pro')) return '';
+  return host;
+}
 
 const isoDay = (date) => date.toISOString().slice(0, 10);
 
@@ -123,6 +180,71 @@ async function homelab() {
   return body;
 }
 
+// ---- Panel privado ----
+
+// Comprueba el token de Cloudflare Access (RS256). Las claves públicas se guardan una hora.
+let accessKeys = { at: 0, keys: new Map() };
+
+async function loadAccessKeys(force = false) {
+  if (!force && Date.now() - accessKeys.at < 3_600_000) return accessKeys.keys;
+  const res = await fetch(ACCESS_CERTS_URL, { signal: AbortSignal.timeout(5000) });
+  if (!res.ok) throw new Error(`Claves de Cloudflare Access: ${res.status}`);
+  const { keys = [] } = await res.json();
+  accessKeys = { at: Date.now(), keys: new Map(keys.map((k) => [k.kid, createPublicKey({ key: k, format: 'jwk' })])) };
+  return accessKeys.keys;
+}
+
+const b64 = (s) => Buffer.from(s, 'base64url');
+
+async function accessAllowed(req) {
+  if (!ACCESS_TEAM || !ACCESS_AUD) return false;
+  const token = String(req.headers['cf-access-jwt-assertion'] ?? '');
+  const [h, p, sig] = token.split('.');
+  if (!h || !p || !sig) return false;
+  let header;
+  let payload;
+  try {
+    header = JSON.parse(b64(h));
+    payload = JSON.parse(b64(p));
+  } catch {
+    return false;
+  }
+  if (header.alg !== 'RS256') return false;
+  let keys = await loadAccessKeys();
+  if (!keys.has(header.kid)) keys = await loadAccessKeys(true);
+  const key = keys.get(header.kid);
+  if (!key || !verify('RSA-SHA256', Buffer.from(`${h}.${p}`), key, b64(sig))) return false;
+  const now = Date.now() / 1000;
+  const aud = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+  return aud.includes(ACCESS_AUD) && payload.iss === ACCESS_ISSUER && typeof payload.exp === 'number' && payload.exp > now;
+}
+
+const PERIODS = new Set([7, 30, 90, 365]);
+
+function stats(days) {
+  const from = isoDay(new Date(Date.now() - (days - 1) * 86_400_000));
+  const all = (sql, ...args) => db.prepare(sql).all(...args).map((r) => ({ ...r }));
+  const one = (sql, ...args) => Number(db.prepare(sql).get(...args).total);
+  const group = (column) =>
+    all(`SELECT ${column} AS key, SUM(count) AS count FROM details WHERE day >= ? GROUP BY ${column} ORDER BY count DESC LIMIT 25`, from);
+  return {
+    from,
+    to: isoDay(new Date()),
+    visits: one('SELECT COALESCE(SUM(count), 0) AS total FROM visits WHERE day >= ?', from),
+    by_day: all('SELECT day, SUM(count) AS count FROM visits WHERE day >= ? GROUP BY day ORDER BY day', from),
+    pages: all('SELECT path AS key, SUM(count) AS count FROM visits WHERE day >= ? GROUP BY path ORDER BY count DESC', from),
+    langs: all('SELECT lang AS key, SUM(count) AS count FROM visits WHERE day >= ? GROUP BY lang ORDER BY count DESC', from),
+    // País, origen y dispositivo solo existen desde que se añadió el panel
+    detailed: one('SELECT COALESCE(SUM(count), 0) AS total FROM details WHERE day >= ?', from),
+    details_since: db.prepare('SELECT MIN(day) AS day FROM details').get().day ?? null,
+    countries: group('country'),
+    sources: group('source'),
+    devices: group('device'),
+    downloads: one('SELECT COALESCE(SUM(count), 0) AS total FROM downloads WHERE day >= ?', from),
+    downloads_by_lang: all('SELECT lang AS key, SUM(count) AS count FROM downloads WHERE day >= ? GROUP BY lang ORDER BY count DESC', from),
+  };
+}
+
 let windowStart = Date.now();
 let hitsInWindow = 0;
 
@@ -185,9 +307,32 @@ const server = createServer(async (req, res) => {
         return send(res, 400);
       }
       if (!PAGES.has(data?.path) || !LANGS.has(data?.lang)) return send(res, 400);
-      if (underLimit()) addVisit.run(isoDay(new Date()), data.path, data.lang);
+      if (underLimit()) {
+        const day = isoDay(new Date());
+        addVisit.run(day, data.path, data.lang);
+        const device = DEVICES.has(data.device) ? data.device : '';
+        addDetail.run(day, data.path, countryOf(req), sourceOf(data.ref), device);
+      }
       // Se responde igual aunque se haya alcanzado el tope, para no dar pistas
       return send(res, 204);
+    }
+
+    if (pathname === '/api/download' && req.method === 'POST') {
+      let data;
+      try {
+        data = JSON.parse(await readBody(req));
+      } catch {
+        return send(res, 400);
+      }
+      if (!LANGS.has(data?.lang)) return send(res, 400);
+      if (underLimit()) addDownload.run(isoDay(new Date()), data.lang);
+      return send(res, 204);
+    }
+
+    if (pathname === '/api/estadisticas' && req.method === 'GET') {
+      if (!(await accessAllowed(req))) return send(res, 403, JSON.stringify({ error: 'Necesitas entrar con Cloudflare Access.' }));
+      const days = Number(new URL(req.url, 'http://localhost').searchParams.get('dias') ?? 30);
+      return send(res, 200, JSON.stringify(stats(PERIODS.has(days) ? days : 30)));
     }
 
     if (pathname === '/api/health' && req.method === 'GET') {

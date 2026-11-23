@@ -20,6 +20,9 @@ services:
       # Página de estado de Uptime Kuma para luisse.pro/homelab (van en ~/web/.env)
       - KUMA_URL=${KUMA_URL:-}
       - KUMA_SLUG=${KUMA_SLUG:-}
+      # Panel privado de estadísticas, detrás de Cloudflare Access (ver docs/estadisticas.md)
+      - ACCESS_TEAM=${ACCESS_TEAM:-}
+      - ACCESS_AUD=${ACCESS_AUD:-}
     volumes:
       - ./stats/server.mjs:/app/server.mjs:ro
       - ./stats-data:/data

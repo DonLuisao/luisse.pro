@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Estadísticas | luisse.pro</title>
+<link rel="icon" href="/icono.svg" type="image/svg+xml">
+<script>
+  // Mismo tema que el resto de luisse.pro
+  try {
+    const t = localStorage.getItem('theme');
+    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+<style>
+  @font-face { font-family: "Instrument Sans"; src: url("/fonts/InstrumentSans-Regular.woff") format("woff"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Instrument Sans"; src: url("/fonts/InstrumentSans-Bold.woff") format("woff"); font-weight: 700; font-display: swap; }
+  @font-face { font-family: "Red Hat Mono"; src: url("/fonts/RedHatMono-Regular.woff") format("woff"); font-weight: 400; font-display: swap; }
+
+  :root {
+    --bg: #eef1f4; --surface: #ffffff; --ink: #0e1b2e; --muted: #4a586c; --line: #cfd6de;
+    --cable: #f5b700; --bar: #1f4fb8; --track: #e3e8ee;
+    --font: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "Red Hat Mono", ui-monospace, Menlo, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0a1422; --surface: #132036; --ink: #eef1f4; --muted: #a9b6c8; --line: #26354b; --bar: #8fb1ff; --track: #1c2b44; color-scheme: dark; }
+  }
+  :root[data-theme="dark"] { --bg: #0a1422; --surface: #132036; --ink: #eef1f4; --muted: #a9b6c8; --line: #26354b; --bar: #8fb1ff; --track: #1c2b44; color-scheme: dark; }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 1rem/1.5 var(--font); }
+  h1, h2, p, ul { margin: 0; padding: 0; }
+  ul { list-style: none; }
+  a { color: inherit; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 68rem; margin: 0 auto; padding: 2rem clamp(1.25rem, 5vw, 3rem) 4rem; }
+
+  header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--ink); }
+  .back { font-size: 0.9375rem; color: var(--muted); text-decoration: none; }
+  .back:hover { color: var(--ink); }
+  h1 { margin-top: 0.4rem; font-size: clamp(2rem, 5vw, 3rem); line-height: 1; letter-spacing: -0.035em; }
+
+  .period { display: inline-flex; padding: 3px; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: 0.6rem; }
+  .period button { border: 0; background: none; color: var(--muted); font: 700 0.9375rem var(--font); padding: 0.4rem 0.8rem; border-radius: 0.45rem; cursor: pointer; }
+  .period button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .period button:focus-visible { outline: 2px solid var(--bar); outline-offset: 2px; }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; margin-top: 1.75rem; background: var(--line); border: 1px solid var(--line); border-radius: 0.9rem; overflow: hidden; }
+  .kpi { background: var(--surface); padding: 1.1rem 1.25rem; }
+  .kpi dt { color: var(--muted); font-size: 0.9375rem; }
+  .kpi dd { margin: 0.2rem 0 0; font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+  .kpi .sub { display: block; font-family: var(--font); margin-top: 0.15rem; color: var(--muted); font-size: 0.875rem; font-weight: 400; letter-spacing: 0; }
+  @media (max-width: 46rem) { .kpis { grid-template-columns: 1fr 1fr; } }
+
+  .panel { margin-top: 1.25rem; padding: 1.25rem 1.25rem 1.1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 0.9rem; }
+  .panel h2 { font-size: 1.125rem; letter-spacing: -0.01em; }
+  .panel .hint { margin-top: 0.15rem; color: var(--muted); font-size: 0.875rem; }
+
+  .chart { position: relative; margin-top: 1rem; height: 220px; }
+  .chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .grid line { stroke: var(--line); stroke-width: 1; }
+  .axis text { fill: var(--muted); font: 400 11px var(--mono); }
+  .bar { fill: var(--bar); pointer-events: none; }
+  .hit { fill: transparent; cursor: default; }
+  .hit:hover + .bar, .bar.on { fill: var(--ink); }
+  .tip { position: absolute; z-index: 2; pointer-events: none; padding: 0.35rem 0.6rem; background: var(--ink); color: var(--bg); border-radius: 0.4rem; font-size: 0.875rem; white-space: nowrap; transform: translate(-50%, calc(-100% - 8px)); }
+  .tip[hidden] { display: none; }
+
+  .cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin-top: 1.25rem; }
+  .cols .panel { margin-top: 0; }
+  @media (max-width: 46rem) { .cols { grid-template-columns: 1fr; } }
+
+  .rank { margin-top: 0.8rem; }
+  .rank li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.15rem 1rem; padding: 0.45rem 0; border-top: 1px solid var(--line); }
+  .rank li:first-child { border-top: 0; }
+  .rank .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rank .val { text-align: right; font-size: 0.9375rem; }
+  .rank .val small { color: var(--muted); margin-left: 0.4rem; }
+  .rank .track { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; }
+  .rank .fill { display: block; height: 100%; border-radius: 3px; background: var(--bar); }
+  .empty { margin-top: 0.8rem; color: var(--muted); }
+
+  .notice { margin-top: 1.75rem; padding: 1rem 1.25rem; border-left: 4px solid var(--cable); background: var(--surface); border-radius: 0.5rem; }
+  .notice[hidden] { display: none; }
+  footer { margin-top: 2.5rem; color: var(--muted); font-size: 0.875rem; }
+  @media (prefers-reduced-motion: no-preference) { .bar { transition: fill 0.12s; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <a class="back" href="/">luisse.pro</a>
+      <h1>Estadísticas</h1>
+    </div>
+    <div class="period" role="group" aria-label="Periodo">
+      <button type="button" data-days="7" aria-pressed="false">7 días</button>
+      <button type="button" data-days="30" aria-pressed="true">30 días</button>
+      <button type="button" data-days="90" aria-pressed="false">90 días</button>
+      <button type="button" data-days="365" aria-pressed="false">1 año</button>
+    </div>
+  </header>
+
+  <p class="notice" id="notice" role="status" hidden></p>
+
+  <main id="content" hidden>
+    <dl class="kpis">
+      <div class="kpi"><dt>Visitas</dt><dd class="num" id="k-visits"></dd></div>
+      <div class="kpi"><dt>Media al día</dt><dd class="num" id="k-avg"></dd></div>
+      <div class="kpi"><dt>Mejor día</dt><dd class="num" id="k-best"></dd></div>
+      <div class="kpi"><dt>Descargas del CV en PDF</dt><dd class="num" id="k-pdf"></dd></div>
+    </dl>
+
+    <section class="panel" aria-labelledby="t-days">
+      <h2 id="t-days">Visitas por día</h2>
+      <div class="chart" id="chart"><div class="tip" id="tip" hidden></div></div>
+    </section>
+
+    <div class="cols">
+      <section class="panel"><h2>Páginas</h2><ul class="rank" id="r-pages"></ul></section>
+      <section class="panel"><h2>Idioma de la página</h2><ul class="rank" id="r-langs"></ul></section>
+      <section class="panel"><h2>De dónde llegan</h2><p class="hint" id="h-sources"></p><ul class="rank" id="r-sources"></ul></section>
+      <section class="panel"><h2>País</h2><p class="hint" id="h-countries"></p><ul class="rank" id="r-countries"></ul></section>
+      <section class="panel"><h2>Dispositivo</h2><p class="hint" id="h-devices"></p><ul class="rank" id="r-devices"></ul></section>
+      <section class="panel"><h2>Descargas del PDF por idioma</h2><ul class="rank" id="r-pdf"></ul></section>
+    </div>
+  </main>
+
+  <footer>Sin cookies ni IPs: solo contadores por día. Página privada, protegida con Cloudflare Access.</footer>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const nf = new Intl.NumberFormat('es');
+  const pf = new Intl.NumberFormat('es', { style: 'percent', maximumFractionDigits: 0 });
+  const region = new Intl.DisplayNames(['es'], { type: 'region' });
+  const dayFmt = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' });
+  const longFmt = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long' });
+  const asDate = (d) => new Date(`${d}T12:00:00Z`);
+
+  const PAGES = { '/': 'CV en español', '/en/': 'CV en inglés', '/homelab/': 'Homelab en español', '/en/homelab/': 'Homelab en inglés' };
+  const LANGS = { es: 'Español', en: 'Inglés' };
+  const DEVICES = { mobile: 'Móvil', desktop: 'Ordenador' };
+
+  function notice(text) {
+    $('notice').textContent = text;
+    $('notice').hidden = !text;
+  }
+
+  // Lista con barra proporcional. El texto va siempre en tinta normal; la barra solo indica el tamaño.
+  function rank(el, rows, label) {
+    el.replaceChildren();
+    const total = rows.reduce((n, r) => n + r.count, 0);
+    if (!total) {
+      const p = document.createElement('p');
+      p.className = 'empty';
+      p.textContent = 'Todavía no hay datos en este periodo.';
+      el.append(p);
+      return;
+    }
+    const max = Math.max(...rows.map((r) => r.count));
+    for (const r of rows) {
+      const li = document.createElement('li');
+      const name = document.createElement('span');
+      name.className = 'label';
+      name.textContent = label(r.key);
+      const val = document.createElement('span');
+      val.className = 'val num';
+      val.textContent = nf.format(r.count);
+      const share = document.createElement('small');
+      share.textContent = pf.format(r.count / total);
+      val.append(share);
+      const track = document.createElement('span');
+      track.className = 'track';
+      track.setAttribute('aria-hidden', 'true');
+      const fill = document.createElement('span');
+      fill.className = 'fill';
+      fill.style.width = `${(r.count / max) * 100}%`;
+      track.append(fill);
+      li.append(name, val, track);
+      el.append(li);
+    }
+  }
+
+  // En periodos largos, una barra por semana (las barras de un día serían de menos de un píxel)
+  function buckets(days) {
+    if (days.length <= 90) return days.map((d) => ({ ...d, label: longFmt.format(asDate(d.day)) }));
+    const out = [];
+    for (let i = 0; i < days.length; i += 7) {
+      const week = days.slice(i, i + 7);
+      out.push({ day: week[0].day, count: week.reduce((n, d) => n + d.count, 0), label: `Semana del ${dayFmt.format(asDate(week[0].day))}` });
+    }
+    return out;
+  }
+
+  function chart(all) {
+    const days = buckets(all);
+    $('t-days').textContent = all.length <= 90 ? 'Visitas por día' : 'Visitas por semana';
+    const box = $('chart');
+    box.querySelector('svg')?.remove();
+    const tip = $('tip');
+    const W = box.clientWidth;
+    const H = box.clientHeight;
+    const pad = { l: 30, r: 4, t: 8, b: 22 };
+    const max = Math.max(1, ...days.map((d) => d.count));
+    const step = max <= 4 ? 1 : Math.ceil(max / 4 / 5) * 5 || 1;
+    const top = Math.ceil(max / step) * step;
+    const y = (v) => pad.t + (H - pad.t - pad.b) * (1 - v / top);
+    const cw = (W - pad.l - pad.r) / days.length;
+    const bw = Math.max(1, cw - 2); // 2px de separación entre barras
+    const NS = 'http://www.w3.org/2000/svg';
+    const el = (name, attrs, parent) => {
+      const n = document.createElementNS(NS, name);
+      for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+      parent?.append(n);
+      return n;
+    };
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `Visitas por día: ${days.map((d) => `${dayFmt.format(asDate(d.day))}, ${d.count}`).join('; ')}` });
+    const grid = el('g', { class: 'grid' }, svg);
+    const axis = el('g', { class: 'axis' }, svg);
+    for (let v = 0; v <= top; v += step) {
+      el('line', { x1: pad.l, x2: W - pad.r, y1: y(v), y2: y(v) }, grid);
+      el('text', { x: pad.l - 6, y: y(v) + 4, 'text-anchor': 'end' }, axis).textContent = nf.format(v);
+    }
+    const ticks = new Set([0, Math.floor((days.length - 1) / 2), days.length - 1]);
+    days.forEach((d, i) => {
+      const x = pad.l + i * cw;
+      if (ticks.has(i)) {
+        const anchor = i === 0 ? 'start' : i === days.length - 1 ? 'end' : 'middle';
+        const tx = anchor === 'start' ? x : anchor === 'end' ? x + cw : x + cw / 2;
+        el('text', { x: tx, y: H - 4, 'text-anchor': anchor }, axis).textContent = dayFmt.format(asDate(d.day));
+      }
+      // Zona de hover de toda la columna, más grande que la barra
+      const hit = el('rect', { class: 'hit', x, y: pad.t, width: cw, height: H - pad.t - pad.b }, svg);
+      const h = d.count ? Math.max(2, y(0) - y(d.count)) : 0;
+      const r = Math.min(4, bw / 2, h);
+      const bx = x + (cw - bw) / 2;
+      const by = y(0) - h;
+      // Barra con las esquinas de arriba redondeadas y la base recta
+      const bar = el('path', { class: 'bar', d: h ? `M${bx},${y(0)} V${by + r} Q${bx},${by} ${bx + r},${by} H${bx + bw - r} Q${bx + bw},${by} ${bx + bw},${by + r} V${y(0)} Z` : '' }, svg);
+      hit.addEventListener('mouseenter', () => {
+        bar.classList.add('on');
+        tip.textContent = `${d.label}: ${nf.format(d.count)} ${d.count === 1 ? 'visita' : 'visitas'}`;
+        tip.style.left = `${Math.min(Math.max(x + cw / 2, 90), W - 90)}px`;
+        tip.style.top = `${by}px`;
+        tip.hidden = false;
+      });
+      hit.addEventListener('mouseleave', () => {
+        bar.classList.remove('on');
+        tip.hidden = true;
+      });
+    });
+    box.prepend(svg);
+  }
+
+  let current = 30;
+  let lastDays = [];
+
+  async function load(days) {
+    current = days;
+    for (const b of document.querySelectorAll('.period button')) b.setAttribute('aria-pressed', String(Number(b.dataset.days) === days));
+    let res;
+    try {
+      res = await fetch(`/api/estadisticas?dias=${days}`, { credentials: 'same-origin', cache: 'no-store' });
+    } catch (e) {
+      notice('No se ha podido conectar con la Raspberry Pi. Vuelve a intentarlo en un momento.');
+      return;
+    }
+    if (res.status === 403) {
+      notice('Esta página solo funciona a través de Cloudflare Access. Si acabas de entrar, recarga; si no, revisa la configuración en docs/estadisticas.md.');
+      $('content').hidden = true;
+      return;
+    }
+    if (!res.ok) {
+      notice(`El servicio de estadísticas ha respondido con un error (${res.status}).`);
+      return;
+    }
+    const s = await res.json();
+
+    // Rellenar con ceros los días sin visitas
+    const counts = new Map(s.by_day.map((d) => [d.day, d.count]));
+    lastDays = [];
+    for (let t = asDate(s.from); t <= asDate(s.to); t = new Date(t.getTime() + 86_400_000)) {
+      const day = t.toISOString().slice(0, 10);
+      lastDays.push({ day, count: counts.get(day) ?? 0 });
+    }
+    const best = lastDays.reduce((a, b) => (b.count > a.count ? b : a), lastDays[0]);
+    $('k-visits').textContent = nf.format(s.visits);
+    $('k-avg').textContent = new Intl.NumberFormat('es', { maximumFractionDigits: 1 }).format(s.visits / lastDays.length);
+    $('k-best').replaceChildren(nf.format(best.count));
+    if (best.count) {
+      const sub = document.createElement('span');
+      sub.className = 'sub';
+      sub.textContent = longFmt.format(asDate(best.day));
+      $('k-best').append(sub);
+    }
+    $('k-pdf').textContent = nf.format(s.downloads);
+
+    rank($('r-pages'), s.pages, (k) => PAGES[k] ?? k);
+    rank($('r-langs'), s.langs, (k) => LANGS[k] ?? k);
+    rank($('r-sources'), s.sources, (k) => k || 'Directo o desconocido');
+    rank($('r-countries'), s.countries, (k) => { try { return k ? region.of(k) : 'Desconocido'; } catch (e) { return k; } });
+    rank($('r-devices'), s.devices, (k) => DEVICES[k] ?? 'Desconocido');
+    rank($('r-pdf'), s.downloads_by_lang, (k) => LANGS[k] ?? k);
+
+    // País, origen y dispositivo empezaron a guardarse más tarde que las visitas
+    const partial = s.detailed < s.visits && s.details_since
+      ? `Con datos desde el ${longFmt.format(asDate(s.details_since))}: ${nf.format(s.detailed)} de ${nf.format(s.visits)} visitas.`
+      : '';
+    for (const id of ['h-sources', 'h-countries', 'h-devices']) $(id).textContent = partial;
+
+    notice('');
+    $('content').hidden = false;
+    chart(lastDays);
+  }
+
+  for (const b of document.querySelectorAll('.period button')) b.addEventListener('click', () => load(Number(b.dataset.days)));
+  new ResizeObserver(() => lastDays.length && chart(lastDays)).observe($('chart'));
+  load(current);
+})();
+</script>
+</body>
+</html>
