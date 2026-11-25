@@ -167,3 +167,19 @@ nombre de cada monitor, si funciona y su disponibilidad en 24 horas.
 4. En el panel, en *Homelab*, escribe en cada equipo o servicio el nombre exacto de su monitor.
 
 Sin esas variables, la página se ve igual pero sin los puntos de estado.
+
+## Cabeceras de seguridad
+
+Cada página lleva su propia política de seguridad de contenidos (CSP): `scripts/csp.mjs` la
+calcula en el build con el hash exacto de cada script y estilo de la página, así que el navegador
+no ejecuta nada que no hayamos publicado. Las demás cabeceras (HSTS, `frame-ancestors`,
+`X-Frame-Options`...) las pone Caddy, en `deploy/Caddyfile`.
+
+Si cambias el `Caddyfile`, cópialo a la Pi y recarga Caddy:
+
+```sh
+scp deploy/Caddyfile lu1sa0@raspi:web/
+ssh lu1sa0@raspi 'cd ~/web && docker compose exec web caddy reload --config /etc/caddy/Caddyfile'
+```
+
+Para comprobarlas: https://securityheaders.com/?q=luisse.pro

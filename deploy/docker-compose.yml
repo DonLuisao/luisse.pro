@@ -23,6 +23,9 @@ services:
       # Panel privado de estadísticas, detrás de Cloudflare Access (ver docs/estadisticas.md)
       - ACCESS_TEAM=${ACCESS_TEAM:-}
       - ACCESS_AUD=${ACCESS_AUD:-}
+      # Resumen semanal por correo, los lunes a las 9 (ver docs/estadisticas.md)
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - REPORT_TO=${REPORT_TO:-}
     volumes:
       - ./stats/server.mjs:/app/server.mjs:ro
       - ./stats-data:/data

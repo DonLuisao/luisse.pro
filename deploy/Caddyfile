@@ -2,6 +2,21 @@
 :80 {
 	encode zstd gzip
 
+	# Cabeceras de seguridad. La CSP con los scripts y estilos permitidos va dentro de cada
+	# página (la calcula scripts/csp.mjs en el build); aquí van las que no se pueden poner con <meta>.
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		Content-Security-Policy "frame-ancestors 'none'; base-uri 'none'; object-src 'none'"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+		-Server
+	}
+	# Aislar la ventana, salvo en el panel de edición (inicia sesión con GitHub)
+	@notadmin not path /admin/*
+	header @notadmin Cross-Origin-Opener-Policy "same-origin"
+
 	# Estadísticas: las atiende el contenedor "stats" (stats/server.mjs)
 	handle /api/* {
 		reverse_proxy stats:8080

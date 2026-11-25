@@ -80,3 +80,30 @@ cd ~/web && docker compose up -d stats
 
 Si el panel dice que solo funciona a través de Cloudflare Access estando ya dentro, el `ACCESS_TEAM`
 o el `ACCESS_AUD` de la Pi no coinciden con los de la aplicación.
+
+## Resumen semanal por correo
+
+Cada lunes a las 9:00 (hora de Madrid), el servicio `stats` manda un correo con las visitas de
+la semana anterior (de lunes a domingo), comparadas con la semana de antes, las descargas del
+PDF y de dónde han llegado. Sale de `estadisticas@envio.luisse.pro`, el subdominio de envío que
+ya está verificado en Resend.
+
+1. En Resend, crea una API key con permiso *Sending access* solo para `envio.luisse.pro`
+   (por ejemplo, llamada `luisse-estadisticas`).
+2. En la Pi, añade a `~/web/.env`:
+
+   ```sh
+   RESEND_API_KEY=re_...
+   REPORT_TO=luis@luisse.pro
+   ```
+
+3. En `~/web/docker-compose.yml`, en `environment` del servicio `stats`, las dos líneas
+   `RESEND_API_KEY` y `REPORT_TO` (como en `deploy/docker-compose.yml`), y reinicia:
+   `docker compose up -d stats`.
+4. Para probarlo sin esperar al lunes:
+
+   ```sh
+   docker compose exec stats wget -qO- --post-data= http://127.0.0.1:8080/api/resumen/prueba
+   ```
+
+   Esa dirección solo responde desde dentro del contenedor.

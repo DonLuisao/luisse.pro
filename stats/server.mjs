@@ -7,6 +7,10 @@
 //   GET  /api/estadisticas   datos del panel privado (solo con Cloudflare Access, ver abajo)
 //   GET  /api/health         para comprobar que el servicio está vivo
 //
+// Además, cada lunes a las 9:00 (hora de Madrid) manda por correo un resumen de la semana,
+// si están RESEND_API_KEY y REPORT_TO. Para probarlo sin esperar al lunes, desde la Pi:
+//   docker compose exec stats wget -qO- --post-data= http://127.0.0.1:8080/api/resumen/prueba
+//
 // Privacidad: por cada visita solo se guardan, sumados en contadores por día, la página, el
 // idioma, el país (lo pone Cloudflare), el dominio desde el que se llega (linkedin.com, sin
 // la dirección completa) y si es móvil u ordenador. No hay cookies, ni IPs, ni nada que
@@ -38,6 +42,13 @@ const ACCESS_TEAM = process.env.ACCESS_TEAM ?? ''; // p. ej. "luisse" de luisse.
 const ACCESS_AUD = process.env.ACCESS_AUD ?? ''; // "Application Audience (AUD) Tag" de la aplicación
 const ACCESS_CERTS_URL = process.env.ACCESS_CERTS_URL ?? `https://${ACCESS_TEAM}.cloudflareaccess.com/cdn-cgi/access/certs`;
 const ACCESS_ISSUER = process.env.ACCESS_ISSUER ?? `https://${ACCESS_TEAM}.cloudflareaccess.com`;
+
+// Resumen semanal por correo (con Resend, desde el subdominio de envío)
+const RESEND_API_KEY = process.env.RESEND_API_KEY ?? '';
+const RESEND_URL = process.env.RESEND_URL ?? 'https://api.resend.com/emails';
+const REPORT_TO = process.env.REPORT_TO ?? '';
+const REPORT_FROM = process.env.REPORT_FROM ?? 'luisse.pro <estadisticas@envio.luisse.pro>';
+const REPORT_TZ = 'Europe/Madrid';
 
 const PAGES = new Set(['/', '/en/', '/homelab/', '/en/homelab/']);
 const LANGS = new Set(['es', 'en']);
@@ -93,6 +104,10 @@ db.exec(`
     PRIMARY KEY (day, lang)
   ) WITHOUT ROWID;
 `);
+db.exec('CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL) WITHOUT ROWID;');
+const getMeta = db.prepare('SELECT value FROM meta WHERE key = ?');
+const setMeta = db.prepare('INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value');
+
 const addDetail = db.prepare(`
   INSERT INTO details (day, path, country, source, device, count) VALUES (?, ?, ?, ?, ?, 1)
   ON CONFLICT (day, path, country, source, device) DO UPDATE SET count = count + 1
@@ -260,6 +275,131 @@ function stats(days) {
   };
 }
 
+// ---- Resumen semanal ----
+
+const PAGE_NAMES = { '/': 'CV en español', '/en/': 'CV en inglés', '/homelab/': 'Homelab en español', '/en/homelab/': 'Homelab en inglés' };
+const DEVICE_NAMES = { mobile: 'Móvil', desktop: 'Ordenador', '': 'Sin datos' };
+const regionName = new Intl.DisplayNames(['es'], { type: 'region' });
+const fmtDay = new Intl.DateTimeFormat('es', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+const fmtLong = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+const escHtml = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+// Los 7 días que terminan ayer (hora UTC, como el resto de contadores)
+export function weekReport(now = new Date()) {
+  const day = (offset) => isoDay(new Date(now.getTime() - offset * 86_400_000));
+  const from = day(7);
+  const to = day(1);
+  const prevFrom = day(14);
+  const prevTo = day(8);
+  const sum = (table, a, b) => Number(db.prepare(`SELECT COALESCE(SUM(count), 0) AS total FROM ${table} WHERE day BETWEEN ? AND ?`).get(a, b).total);
+  const rows = (sql) => db.prepare(sql).all(from, to).map((r) => ({ ...r }));
+  const counts = new Map(rows('SELECT day, SUM(count) AS count FROM visits WHERE day BETWEEN ? AND ? GROUP BY day').map((r) => [r.day, r.count]));
+  const days = [];
+  for (let i = 7; i >= 1; i--) days.push({ day: day(i), count: counts.get(day(i)) ?? 0 });
+  const top = (column) => rows(`SELECT ${column} AS key, SUM(count) AS count FROM details WHERE day BETWEEN ? AND ? GROUP BY ${column} ORDER BY count DESC LIMIT 5`);
+  return {
+    from, to,
+    visits: sum('visits', from, to),
+    previous: sum('visits', prevFrom, prevTo),
+    downloads: sum('downloads', from, to),
+    days,
+    pages: rows('SELECT path AS key, SUM(count) AS count FROM visits WHERE day BETWEEN ? AND ? GROUP BY path ORDER BY count DESC'),
+    sources: top('source'),
+    countries: top('country'),
+    devices: top('device'),
+  };
+}
+
+export function reportEmail(r) {
+  const asDate = (d) => new Date(`${d}T12:00:00Z`);
+  const period = `del ${fmtLong.format(asDate(r.from))} al ${fmtLong.format(asDate(r.to))}`;
+  let change = 'igual que la semana anterior';
+  if (r.previous === 0 && r.visits > 0) change = 'la semana anterior no hubo ninguna';
+  else if (r.visits !== r.previous) {
+    const pct = Math.round(((r.visits - r.previous) / r.previous) * 100);
+    change = `${pct > 0 ? '+' : ''}${pct} % respecto a la semana anterior, que tuvo ${r.previous}`;
+  }
+  const label = {
+    pages: (k) => PAGE_NAMES[k] ?? k,
+    sources: (k) => k || 'Directo o desconocido',
+    countries: (k) => { try { return k ? regionName.of(k) : 'Desconocido'; } catch { return k; } },
+    devices: (k) => DEVICE_NAMES[k] ?? k,
+  };
+  const sections = [
+    ['Páginas', 'pages'],
+    ['De dónde llegan', 'sources'],
+    ['País', 'countries'],
+    ['Dispositivo', 'devices'],
+  ].filter(([, key]) => r[key].length);
+  const max = Math.max(1, ...r.days.map((d) => d.count));
+
+  const subject = `luisse.pro: ${r.visits} ${r.visits === 1 ? 'visita' : 'visitas'} esta semana`;
+  const text = [
+    `Visitas ${period}: ${r.visits}; ${change}.`,
+    `Descargas del CV en PDF: ${r.downloads}.`,
+    '',
+    ...r.days.map((d) => `${fmtDay.format(asDate(d.day))}: ${d.count}`),
+    ...sections.flatMap(([title, key]) => ['', `${title}:`, ...r[key].map((x) => `  ${label[key](x.key)}: ${x.count}`)]),
+    '',
+    'Panel completo: https://luisse.pro/estadisticas/',
+  ].join('\n');
+
+  const td = 'padding:6px 0;border-top:1px solid #e3e8ee;';
+  const html = `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#0e1b2e;max-width:560px;margin:0 auto;padding:24px">
+<p style="margin:0;color:#4a586c;font-size:14px">luisse.pro, ${escHtml(period)}</p>
+<p style="margin:8px 0 0;font-size:44px;font-weight:700;letter-spacing:-1px">${r.visits} ${r.visits === 1 ? 'visita' : 'visitas'}</p>
+<p style="margin:4px 0 0;color:#4a586c">${escHtml(change)}. Descargas del CV en PDF: <b style="color:#0e1b2e">${r.downloads}</b>.</p>
+<table role="presentation" style="width:100%;border-collapse:collapse;margin-top:24px;font-size:14px">
+${r.days.map((d) => `<tr><td style="${td}width:110px;color:#4a586c">${escHtml(fmtDay.format(asDate(d.day)))}</td><td style="${td}"><div style="height:10px;border-radius:3px;background:#1f4fb8;width:${Math.round((d.count / max) * 100)}%;min-width:${d.count ? 4 : 0}px"></div></td><td style="${td}width:40px;text-align:right">${d.count}</td></tr>`).join('')}
+</table>
+${sections.map(([title, key]) => `<p style="margin:24px 0 4px;font-weight:700">${title}</p><table role="presentation" style="width:100%;border-collapse:collapse;font-size:14px">${r[key].map((x) => `<tr><td style="${td}">${escHtml(label[key](x.key))}</td><td style="${td}text-align:right">${x.count}</td></tr>`).join('')}</table>`).join('')}
+<p style="margin:28px 0 0"><a href="https://luisse.pro/estadisticas/" style="color:#1f4fb8;font-weight:700">Abrir el panel de estadísticas</a></p>
+</div>`;
+  return { subject, text, html };
+}
+
+async function sendReport(now = new Date()) {
+  const { subject, text, html } = reportEmail(weekReport(now));
+  const res = await fetch(RESEND_URL, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${RESEND_API_KEY}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ from: REPORT_FROM, to: [REPORT_TO], subject, text, html }),
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!res.ok) throw new Error(`Resend respondió ${res.status}: ${(await res.text()).slice(0, 200)}`);
+}
+
+// Fecha y hora de Madrid, para saber si ya es lunes a las 9
+function madridNow(now) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-GB', { timeZone: REPORT_TZ, weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23' })
+      .formatToParts(now)
+      .map((p) => [p.type, p.value]),
+  );
+  return { weekday: parts.weekday, hour: Number(parts.hour), date: `${parts.year}-${parts.month}-${parts.day}` };
+}
+
+async function maybeSendReport() {
+  if (!RESEND_API_KEY || !REPORT_TO) return;
+  const now = new Date();
+  const m = madridNow(now);
+  if (m.weekday !== 'Mon' || m.hour < 9) return;
+  if (getMeta.get('last_report')?.value === m.date) return;
+  try {
+    await sendReport(now);
+    setMeta.run('last_report', m.date);
+    console.log(`Resumen semanal enviado a ${REPORT_TO}`);
+  } catch (error) {
+    // Se reintentará en la siguiente comprobación
+    console.error('No se ha podido enviar el resumen semanal:', error.message);
+  }
+}
+
+setInterval(maybeSendReport, 10 * 60_000).unref();
+setTimeout(maybeSendReport, 30_000).unref();
+
+const isLoopback = (req) => ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress);
+
 let windowStart = Date.now();
 let hitsInWindow = 0;
 
@@ -348,6 +488,18 @@ const server = createServer(async (req, res) => {
       if (!(await accessAllowed(req))) return send(res, 403, JSON.stringify({ error: 'Necesitas entrar con Cloudflare Access.' }));
       const days = Number(new URL(req.url, 'http://localhost').searchParams.get('dias') ?? 30);
       return send(res, 200, JSON.stringify(stats(PERIODS.has(days) ? days : 30)));
+    }
+
+    // Envía el resumen ahora, para probarlo. Solo desde dentro del contenedor.
+    if (pathname === '/api/resumen/prueba' && req.method === 'POST') {
+      if (!isLoopback(req)) return send(res, 404);
+      if (!RESEND_API_KEY || !REPORT_TO) return send(res, 400, 'Faltan RESEND_API_KEY o REPORT_TO\n', 'text/plain');
+      try {
+        await sendReport();
+        return send(res, 200, `Resumen enviado a ${REPORT_TO}\n`, 'text/plain');
+      } catch (error) {
+        return send(res, 502, `${error.message}\n`, 'text/plain');
+      }
     }
 
     if (pathname === '/api/health' && req.method === 'GET') {
