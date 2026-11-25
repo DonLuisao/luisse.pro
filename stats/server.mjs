@@ -43,6 +43,21 @@ const PAGES = new Set(['/', '/en/', '/homelab/', '/en/homelab/']);
 const LANGS = new Set(['es', 'en']);
 const DEVICES = new Set(['mobile', 'desktop']);
 
+// Segunda barrera contra visitas que no son de personas (la primera está en la web,
+// src/scripts/visitas.ts). Se descartan sin avisar: la respuesta es la misma.
+const ALLOWED_ORIGINS = new Set((process.env.ALLOWED_ORIGINS ?? 'https://luisse.pro').split(',').map((o) => o.trim()));
+const BOT_UA =
+  /bot\b|bot\/|crawl|spider|slurp|preview|headless|lighthouse|pagespeed|ptst|inspectiontool|facebookexternalhit|whatsapp|telegram|discord|embedly|skype|curl|wget|python|httpclient|phantom|puppeteer|playwright|selenium|go-http|okhttp|java\//i;
+
+function looksHuman(req) {
+  const ua = String(req.headers['user-agent'] ?? '');
+  if (!ua || BOT_UA.test(ua)) return false;
+  // Los navegadores siempre mandan su idioma; la mayoría de scripts y bots, no
+  if (!/[a-z]{2}/i.test(String(req.headers['accept-language'] ?? ''))) return false;
+  // sendBeacon manda Origin: solo valen las peticiones hechas desde la propia web
+  return ALLOWED_ORIGINS.has(String(req.headers.origin ?? ''));
+}
+
 const db = new DatabaseSync(DB_PATH);
 db.exec(`
   CREATE TABLE IF NOT EXISTS visits (
@@ -307,7 +322,7 @@ const server = createServer(async (req, res) => {
         return send(res, 400);
       }
       if (!PAGES.has(data?.path) || !LANGS.has(data?.lang)) return send(res, 400);
-      if (underLimit()) {
+      if (looksHuman(req) && underLimit()) {
         const day = isoDay(new Date());
         addVisit.run(day, data.path, data.lang);
         const device = DEVICES.has(data.device) ? data.device : '';
@@ -325,7 +340,7 @@ const server = createServer(async (req, res) => {
         return send(res, 400);
       }
       if (!LANGS.has(data?.lang)) return send(res, 400);
-      if (underLimit()) addDownload.run(isoDay(new Date()), data.lang);
+      if (looksHuman(req) && underLimit()) addDownload.run(isoDay(new Date()), data.lang);
       return send(res, 204);
     }
 

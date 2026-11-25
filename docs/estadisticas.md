@@ -10,6 +10,23 @@ pone Cloudflare (cabecera `CF-IPCountry`) y del origen solo se guarda el dominio
 El país, el origen y el dispositivo empezaron a guardarse al añadir el panel; las visitas de
 antes solo tienen página e idioma, y el panel lo indica.
 
+## Qué cuenta como visita
+
+Para que las cifras se parezcan lo más posible a personas reales, se filtra en dos sitios:
+
+- **En la web** (`src/scripts/visitas.ts`): no cuentan los navegadores automáticos
+  (`navigator.webdriver`) ni los que se identifican como bots, y la visita solo se envía cuando
+  hay señales de una persona: scroll, toque o tecla, o la página visible al menos 4 segundos.
+  Una visita por página y pestaña.
+- **En la Pi** (`stats/server.mjs`): se descartan las peticiones de bots conocidos, las que no
+  indican el idioma del navegador y las que no vienen de la propia web.
+
+### No contar mis visitas
+
+Entra una vez en https://luisse.pro/?no-contar desde cada navegador y dispositivo que uses.
+Saldrá un aviso y ese navegador dejará de sumar visitas y descargas. Para deshacerlo:
+https://luisse.pro/?contar. (Se guarda en el navegador: si borras sus datos, hay que repetirlo.)
+
 ## Quién puede verlo
 
 La página y los datos los protege Cloudflare Access: antes de llegar a la Pi, Cloudflare pide

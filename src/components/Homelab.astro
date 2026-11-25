@@ -149,6 +149,7 @@ const kinds = ['tunnel', 'remote', 'backup', 'sync', 'lan'];
 <script is:inline type="application/json" id="lab-status-text" set:html={JSON.stringify({ ...ui.status, uptime: ui.uptime }).replace(/</g, '\\u003c')}></script>
 
 <script>
+  import { countVisit } from '../scripts/visitas';
   // Tema claro / oscuro (igual que en el CV)
   document.getElementById('theme-toggle')?.addEventListener('click', () => {
     const root = document.documentElement;
@@ -256,22 +257,8 @@ const kinds = ['tunnel', 'remote', 'backup', 'sync', 'lan'];
   // ---- Visitas y estado en vivo (solo en luisse.pro) ----
   const enabled = location.hostname === 'luisse.pro';
 
-  if (enabled && !(navigator as any).globalPrivacyControl) {
-    // Dominio desde el que se llega (solo el dominio) y si es móvil u ordenador
-    const ref = (() => {
-      try {
-        return document.referrer ? new URL(document.referrer).hostname : '';
-      } catch (e) {
-        return '';
-      }
-    })();
-    const device = ((navigator as any).userAgentData?.mobile ?? /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) ? 'mobile' : 'desktop';
-    const key = `visita:${location.pathname}`;
-    try {
-      if (!sessionStorage.getItem(key)) {
-        sessionStorage.setItem(key, '1');
-        navigator.sendBeacon('/api/hit', JSON.stringify({ path: location.pathname, lang, ref, device }));
-      }
+  // Visitas (ver src/scripts/visitas.ts)
+  if (enabled) countVisit(lang);
     } catch (e) {}
   }
 
